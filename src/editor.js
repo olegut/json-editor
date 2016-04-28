@@ -66,7 +66,7 @@ JSONEditor.AbstractEditor = Class.extend({
   build: function() {
     
   },
-  postBuild: function() {
+  postBuild: function () {
     this.setupWatchListeners();
     this.addLinks();
     this.setValue(this.getDefault(), true);

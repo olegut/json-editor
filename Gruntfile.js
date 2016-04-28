@@ -25,7 +25,8 @@ module.exports = function(grunt) {
 
             // JSON Schema validator
             'src/validator.js',
-
+            // layout engine class
+            'src/layout.js',
             // All the editors
             'src/editor.js',
             'src/editors/null.js',
@@ -112,7 +113,8 @@ module.exports = function(grunt) {
         'src/themes/*.js',
         'src/iconlib.js',
         'src/iconlibs/*.js',
-
+        // layout engine class
+        'src/layout.js',
         // The JS templating engines
         'src/templates/*.js',
 

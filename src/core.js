@@ -20,7 +20,9 @@ JSONEditor.prototype = {
     if(!theme_class) throw "Unknown theme " + (this.options.theme || JSONEditor.defaults.theme);
     
     this.schema = this.options.schema;
+    this.layout_schema = this.options.layout_schema;
     this.theme = new theme_class();
+
     this.template = this.options.template;
     this.refs = this.options.refs || {};
     this.uuid = 0;
@@ -29,9 +31,22 @@ JSONEditor.prototype = {
     var icon_class = JSONEditor.defaults.iconlibs[this.options.iconlib || JSONEditor.defaults.iconlib];
     if(icon_class) this.iconlib = new icon_class();
 
+
     this.root_container = this.theme.getContainer();
+
+    this.layout_builder = new JSONEditor.LayoutBuilder({
+        theme: this.theme,
+        layout_schema: this.layout_schema,
+        root_container: this.root_container
+    });
+
+    if (this.layout_schema !== undefined) {
+        this.root_container = this.layout_builder._rootContainer;
+    } else {
+        this.root_container = this.theme.getContainer();
+    }
+
     this.element.appendChild(this.root_container);
-    
     this.translate = this.options.translate || JSONEditor.defaults.translate;
 
     // Fetch all external refs via ajax
@@ -53,7 +68,10 @@ JSONEditor.prototype = {
         required: true,
         container: self.root_container
       });
-      
+      if (self.layout_builder.options.layout_schema) {
+          self.layout_builder.buildLayout();
+      }
+
       self.root.preBuild();
       self.root.build();
       self.root.postBuild();
