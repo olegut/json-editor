@@ -19,11 +19,13 @@
                     return false;
                 }
             }
-            if (group.OtherFields) {
+            if (group.OtherFields && editor.parent && editor.parent.key == "root") {
                 foundGroup = group;
-            }
+            } 
         });
-        return foundGroup.container;
+        if (foundGroup) {
+            return foundGroup.container;
+        }
     },
     buildLayout: function () {
         var self = this;
@@ -40,6 +42,7 @@
         if (block.type == "group") {
             var group = this._findGroup(block.RefId);
             group.container = currentBlockContainer;
+            group.container.setAttribute("id",group.Id);
         }
         parentElement.appendChild(currentBlockContainer);
     },
@@ -89,7 +92,18 @@ JSONEditor.LayoutBuilder.blocks.group = Class.extend({
         this.options = options;
     },
     createContainer: function () {
-        var container = this.options.theme.getContainer();
+        var container = this.options.theme.getIndentedPanel();
         return container;
+    }
+}); 
+
+ 
+JSONEditor.LayoutBuilder.blocks.container = Class.extend({
+    init: function (options) {
+        this.options = options;
+    },
+    createContainer: function () {
+        var separator = this.options.theme.getIndentedPanel();
+        return separator;
     }
 });

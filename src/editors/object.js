@@ -53,8 +53,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     },
     layoutEditors: function () {
         var self = this, i, j;
-
-        if (!this.row_container) return;
+        if (!this.row_container || this.jsoneditor.layout_schema !== undefined) return;
 
         // Sort editors by propertyOrder
         this.property_order = Object.keys(this.editors);
@@ -262,26 +261,8 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     },
     build: function () {
         var self = this;
-        if (this.jsoneditor.layout_schema !== undefined) {
-            $each(this.editors, function (key, editor) {
-                var layoutHolder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(editor);
-                if (layoutHolder === undefined) {
-                    throw "Unable to locate holder for " + editor.path;
-                }
-                editorHolder = self.theme.getGridColumn();
 
-                if (self.options.table_row) {
-                    layoutHolder = self.container;
-                    editorHolder = self.theme.getTableCell();
-                }
-
-                layoutHolder.appendChild(editorHolder);
-                editor.setContainer(editorHolder);
-                editor.build();
-                editor.postBuild();
-            });
-            // If the object should be rendered as a table row 
-        } else if (this.options.table_row) {
+        if (this.options.table_row) {
             this.editor_holder = this.container;
             $each(this.editors, function (key, editor) {
                 var holder = self.theme.getTableCell();
@@ -370,7 +351,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.addproperty_holder.appendChild(this.addproperty_input);
             this.addproperty_holder.appendChild(this.addproperty_add);
             var spacer = document.createElement('div');
-            spacer.style.clear = 'both';
+            spacer.style.clear = 'both'; 
             this.addproperty_holder.appendChild(spacer);
 
 
@@ -384,14 +365,45 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.error_holder = document.createElement('div');
             this.container.appendChild(this.error_holder);
 
-            // Container for child editor area
-            this.editor_holder = this.theme.getIndentedPanel();
-            this.container.appendChild(this.editor_holder);
+            var layoutSchemaIsUsed = this.jsoneditor.layout_schema !== undefined;
+            if (layoutSchemaIsUsed) {
+                this.editor_holder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(self);
+                this.row_container = this.theme.getGridContainer();
+                if (self.key == "root") {
+                    this.editor_holder = this.container;
+                }
+                this.row_container = this.theme.getGridContainer();
+                this.container.appendChild(this.row_container); 
+            } else {
+                this.editor_holder = this.theme.getIndentedPanel();
+                // Container for child editor area
+                this.container.appendChild(this.editor_holder);
+                // Container for rows of child editors
+                this.row_container = this.theme.getGridContainer();
+                this.editor_holder.appendChild(this.row_container);
+            }
 
-            // Container for rows of child editors
-            this.row_container = this.theme.getGridContainer();
-            this.editor_holder.appendChild(this.row_container);
-            
+            $each(this.editors, function (key, editor) {
+                var layoutHolder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(editor);
+                if (layoutSchemaIsUsed && layoutHolder) {
+                    var editorHolder = self.theme.getGridColumn();
+                    if (self.options.table_row) {
+                        layoutHolder = self.container;
+                        editorHolder = self.theme.getTableCell();
+                    }
+                    layoutHolder.appendChild(editorHolder);
+                    editor.setContainer(editorHolder);
+                } else {
+                    var holder = self.theme.getGridColumn();
+                    self.row_container.appendChild(holder); 
+                    editor.setContainer(holder);
+                }
+
+                editor.build();
+                editor.postBuild();
+            });
+
+            /*
             $each(this.editors, function (key, editor) {
                 var holder = self.theme.getGridColumn();
                     self.row_container.appendChild(holder);
@@ -399,7 +411,8 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 editor.setContainer(holder);
                 editor.build();
                 editor.postBuild();
-            });
+            }); 
+            */
 
             // Control buttons
             this.title_controls = this.theme.getHeaderButtonHolder();
