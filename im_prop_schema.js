@@ -1,5 +1,4 @@
 ﻿var t = {
-    //  theme: 'bootstrap2',
     schema: {
         "title": "IM PROP",
         "type": "object",
@@ -91,35 +90,6 @@
                     }
                 }
             },
-            //"location": {
-            //    "type": "object",
-            //    "title": "Locationvparent",
-            //    "properties": {
-            //        "location": {
-            //            "type": "object",
-            //            "title": "Location (inner)",
-            //            "properties": {
-            //                "city": {
-            //                    "type": "string",
-            //                    "default": "San Francisco"
-            //                },
-            //                "state": {
-            //                    "type": "string",
-            //                    "default": "CA"
-            //                },
-            //                "citystate": {
-            //                    "type": "string",
-            //                    "description": "This is generated automatically from the previous two fields (inner)",
-            //                    "template": "{{city}}, {{state}}",
-            //                    "watch": {
-            //                        "city": "location.city",
-            //                        "state": "location.state"
-            //                    }
-            //                }
-            //            }
-            //        },
-            //    }
-            //},
             "mpf_name": {
                 "type": "string",
                 "title": "IM PROP Name"

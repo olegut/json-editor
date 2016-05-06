@@ -287,10 +287,16 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         }
             // If the object should be rendered as a div
         else {
+            var layoutSchemaIsUsed = this.jsoneditor.layout_schema !== undefined;
+
             this.header = document.createElement('span');
             this.header.textContent = this.getTitle();
             this.title = this.theme.getHeader(this.header);
-            this.container.appendChild(this.title);
+            if (layoutSchemaIsUsed && this.container.firstChild) {
+                this.container.insertBefore(this.title, this.container.firstChild)
+            } else {
+                this.container.appendChild(this.title);
+            }
             this.container.style.position = 'relative';
 
             // Edit JSON modal
@@ -365,14 +371,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.error_holder = document.createElement('div');
             this.container.appendChild(this.error_holder);
 
-            var layoutSchemaIsUsed = this.jsoneditor.layout_schema !== undefined;
             if (layoutSchemaIsUsed) {
                 this.editor_holder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(self);
                 this.row_container = this.theme.getGridContainer();
                 if (self.key == "root") {
-                    this.editor_holder = this.container;
+                    this.editor_holder = this.jsoneditor.layout_container;
                 }
-                this.row_container = this.theme.getGridContainer();
                 this.container.appendChild(this.row_container); 
             } else {
                 this.editor_holder = this.theme.getIndentedPanel();
@@ -402,17 +406,6 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 editor.build();
                 editor.postBuild();
             });
-
-            /*
-            $each(this.editors, function (key, editor) {
-                var holder = self.theme.getGridColumn();
-                    self.row_container.appendChild(holder);
-
-                editor.setContainer(holder);
-                editor.build();
-                editor.postBuild();
-            }); 
-            */
 
             // Control buttons
             this.title_controls = this.theme.getHeaderButtonHolder();

@@ -40,10 +40,11 @@ JSONEditor.prototype = {
         root_container: this.root_container
     });
 
+    this.root_container = this.theme.getContainer();
+
     if (this.layout_schema !== undefined) {
-        this.root_container = this.layout_builder._rootContainer;
-    } else {
-        this.root_container = this.theme.getContainer();
+        this.layout_container = this.layout_builder._rootContainer;
+        this.root_container.appendChild(this.layout_container);
     }
 
     this.element.appendChild(this.root_container);

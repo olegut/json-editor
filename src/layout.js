@@ -4,6 +4,9 @@
         this._rootContainer = this.options.theme.getContainer();
     },
     getLayoutHolderForEditor: function (editor) {
+        if (!this.options.layout_schema) {
+            return;
+        }
         var foundGroup;
         $each(this.options.layout_schema.groups, function (i, group) {
             var fieldFound = false;
