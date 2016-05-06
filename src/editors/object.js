@@ -372,12 +372,19 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.container.appendChild(this.error_holder);
 
             if (layoutSchemaIsUsed) {
-                this.editor_holder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(self);
-                this.row_container = this.theme.getGridContainer();
                 if (self.key == "root") {
+                    this.layout_holder = this.jsoneditor.layout_container;
                     this.editor_holder = this.jsoneditor.layout_container;
+                } else {
+                    this.layout_holder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(self);
+                    if (!this.layout_holder) {
+                        this.layout_holder = this.container;
+                    }
+                    this.editor_holder = this.theme.getIndentedPanel();
+                    this.row_container = this.theme.getGridContainer();
+                    this.editor_holder.appendChild(this.row_container);
+                    this.layout_holder.appendChild(this.editor_holder);
                 }
-                this.container.appendChild(this.row_container); 
             } else {
                 this.editor_holder = this.theme.getIndentedPanel();
                 // Container for child editor area
