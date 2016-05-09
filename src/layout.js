@@ -53,6 +53,12 @@
         if (JSONEditor.LayoutBuilder.blocks[block.type]) {
             var builder = new JSONEditor.LayoutBuilder.blocks[block.type](this.options);
             var container = builder.createContainer(block);
+            if (block.title) {
+                var header = document.createElement('span');
+                header.textContent = block.title;
+                var title = this.options.theme.getHeader(header);
+                container.appendChild(title);
+            }
             if (block.attributes) {
                 $each(block.attributes, function (i, attribute) {
                     container.setAttribute(attribute.name, attribute.value);
