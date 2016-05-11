@@ -2,13 +2,63 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Basic JSON Editor Example</title>
+    <script src="auto-complete.min.js"></script>
+    <link rel="stylesheet" href="auto-complete.css">
     <script src="../dist/jsoneditor.js"></script>
-    <link rel="stylesheet" id="theme_stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css">
+    <!--<link rel="stylesheet" id="theme_stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css">-->
+
+    <style >
+        .improp-root-element{
+            width: 90%;
+            max-width: 800px;
+        }
+        #editor_holder > div> h3 {
+            font-family: Tahoma, Arial, 'MS Sans Serif';
+            font-weight: bold;
+            font-size: 9pt;
+            color: #144489;
+            vertical-align: bottom;
+            border-bottom-color: #2763A5;
+            border-style: solid;
+            border-width: 0px 0px 5px 0px;
+        }
+        .improp-root-element label{
+            float:left;
+            clear: left;
+            min-width: 190px;
+            font-family: Tahoma, Arial, 'MS Sans Serif';
+            font-size: 10.6667px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight:normal!important;
+        }       
+        .improp-root-element .form-control{
+            clear: both;
+            min-height: 20px;
+            padding: 2px;
+        } 
+        
+        .improp-root-element select{
+            max-width: 180px;
+        } 
+        
+        .layout-block-title{
+            font-size: 12px;
+            color:rgb(0, 0, 128);
+            display:table-cell;
+            font-family:Tahoma, Arial, 'MS Sans Serif';
+            font-size:10.6667px;
+            font-style:normal;
+            font-variant:normal;
+            font-weight:bold;
+        }
+        
+        .improp-root-element select{
+            max-width: 180px;
+        } 
+    </style>
 </head>
 <body>
-    <h1>Basic JSON Editor Example</h1>
-
     <div id='editor_holder'></div>
     <button id='submit'>Submit (console.log)</button>
 
@@ -38,10 +88,13 @@
                 window.setTimeout(tickFunction)
             }
         };
-
+JSONEditor.defaults.options.disable_edit_json = true;
+JSONEditor.defaults.options.disable_properties = true;
+JSONEditor.defaults.options.disable_collapse = true;
+  
         // Initialize the editor with a JSON schema
         var editor = new JSONEditor(document.getElementById('editor_holder'), {
-            theme: 'bootstrap2',
+           // theme: 'bootstrap2',
             schema: {
                 title: "IM PROP",
                 type: "object",
@@ -150,35 +203,35 @@
                             }
                         }
                     },
-                    "location": {
-                        type: "object",
-                        title: "Location Parent Object",
-                        properties: {
-                            "location_nested": {
-                                type: "object",
-                                title: "Location (nested)",
-                                properties: {
-                                    "city": {
-                                        type: "string",
-                                        "default": "San Francisco"
-                                    },
-                                    "state": {
-                                        type: "string",
-                                        "default": "CA"
-                                    },
-                                    "citystate": {
-                                        type: "string",
-                                        "description": "This is generated automatically from the previous two fields (inner)",
-                                        "template": "{{city}}, {{state}}",
-                                        "watch": {
-                                            "city": "location.location_nested.city",
-                                            "state": "location.location_nested.state"
-                                        }
-                                    }
-                                }
-                            },
-                        }
-                    },
+                    // "location": {
+                    //     type: "object",
+                    //     title: "Location Parent Object",
+                    //     properties: {
+                    //         "location_nested": {
+                    //             type: "object",
+                    //             title: "Location (nested)",
+                    //             properties: {
+                    //                 "city": {
+                    //                     type: "string",
+                    //                     "default": "San Francisco"
+                    //                 },
+                    //                 "state": {
+                    //                     type: "string",
+                    //                     "default": "CA"
+                    //                 },
+                    //                 "citystate": {
+                    //                     type: "string",
+                    //                     "description": "This is generated automatically from the previous two fields (inner)",
+                    //                     "template": "{{city}}, {{state}}",
+                    //                     "watch": {
+                    //                         "city": "location.location_nested.city",
+                    //                         "state": "location.location_nested.state"
+                    //                     }
+                    //                 }
+                    //             }
+                    //         },
+                    //     }
+                    // },
                     "mpf_name": {
                         type: "string",
                         title: "IM PROP Name"
@@ -293,72 +346,74 @@
                     },
                     "regulatory_body_id": {
                         type: "string",
+                        format: "autocomplete",
                         title: "Regulatory Body",
-                        "enum": [
-                            "USAPATRIOT ACT|USAPATRIOT ACT",
-                            "TWSE|Taiwan Stock Exchange Corp",
-                            "SICCFIN|SERVICE D'INFORMATION ET DE CONTROLE SUR LES CIRCUITES FINANCIERS",
-                            "SFC|Securities and Futures Commission",
-                            "SECOM MALAYSIA|Securities Commission Malaysia",
-                            "SEC|SECURITIES AND EXCHANGE COMMISSION",
-                            "SCB|The Securities Commission of The Bahamas",
-                            "SAAM|SWISS ASSOCIATION OF ASSET MANAGERS",
-                            "PHLX|Philadelphia Stock Exchange",
-                            "PFTS|PFTS Stock Exchange, Ukraine",
-                            "OSFI|Office of the Superintendent of Financial Institutions Canada",
-                            "OSFI|Office of the Superintendent of Financial Institutions Canada",
-                            "OSC|ONTARIO SECURITIES COMMISION",
-                            "OARG|ORGANISME D'AUTOREGULATION",
-                            "NZFSP|New Zealand Financial Services Provider Register",
-                            "NFA|NATIONAL FUTURES ASSOCIATION",
-                            "MFSA|Malta Financial Services Authority",
-                            "MAS|MONETARY AUTHORITY OF SINGAPORE",
-                            "LISTED|Listed on regulated exchange",
-                            "JFSC|Jersey Financial Services Commission",
-                            "IOM FSC|Isle of Man Financial Supervision Commission",
-                            "INAF|Institut Nacional Andorra De Finances",
-                            "IFS|IRISH FINANCIAL SERVICES REGULATOR",
-                            "HCMC|Hellenic Capital Market Commission",
-                            "GOVERNMENT|GOVT PENSION FUND",
-                            "GFSC|Guernsey Financial Services Commission",
-                            "Finansinspektionen|Swedish Financial Supervisory Authority",
-                            "Financial Supervisory Service of Korea|Financial Supervisory Service of Korea",
-                            "FSS Korea|Financial Supervisory Service of Korea",
-                            "FSCM|Financial Services Commission of Mauritius",
-                            "FSCB|Financial Supervision Commission of Bulgaria",
-                            "FSC|Financial Services Commission of Gibraltar",
-                            "FSB|Financial Services Board South Africa",
-                            "FSAN|The Financial Supervisory Authority of Norway",
-                            "FSAJP|Financial Services Agency Japan",
-                            "FMSA|Financial Market Stabilisation Agency",
-                            "FMA|Financial Market Authority Liechtenstein",
-                            "FINRA|FINANCIAL INDUSTRY REGULATORY AUTHORITY",
-                            "FINMA|Swiss Financial Market Supervisory Authority",
-                            "FCA|FINANCIAL CONDUCT AUTHORITY",
-                            "Danish FSA|Finanstilsynet",
-                            "CSSF|Commission de Surveillance du Secteur Financier - Luxembourg",
-                            "CSEC|Cyprus Securities and Exchange Commission",
-                            "CSA|Canadian Securities Administrators",
-                            "CNMV|Comisión Nacional del Mercado de Valores",
-                            "CIMA|Cayman Islands Monetary Authority",
-                            "CCAF|Commission de Controle des Activities Financiers",
-                            "CBOE|CHICAGO BOARD OPTIONS EXCHANGE",
-                            "CBIE|Central Bank of Ireland",
-                            "BVIFSC|British Virgin Islands Financial Services Commission",
-                            "BOS|BANK OF SLOVENIA",
-                            "BMA|Bermuda Monetary Authority",
-                            "BI|BANK D\'ITALIA",
-                            "BF|Banque de France",
-                            "BDP|Banco De Portugal",
-                            "BDE|Banco De Espana",
-                            "BAFIN|German Federal Financial Supervisory Authority",
-                            "ATVP|Securities Market Agency Slovenia",
-                            "ATVP|Securities Market Agency Slovenia",
-                            "ASIC|AUSTRALIAN SECURITIES & INVESTMENTS COMMISSION",
-                            "AMF|AUTORITE DES MARCHES FINANCIERS",
-                            "AFM|Netherlands Authority For the Financial Markets"
-                        ],
-                        "default": "undefined"
+                           options: {
+                                choises: [
+                                    "USAPATRIOT ACT|USAPATRIOT ACT",
+                                    "TWSE|Taiwan Stock Exchange Corp",
+                                    "SICCFIN|SERVICE D'INFORMATION ET DE CONTROLE SUR LES CIRCUITES FINANCIERS",
+                                    "SFC|Securities and Futures Commission",
+                                    "SECOM MALAYSIA|Securities Commission Malaysia",
+                                    "SEC|SECURITIES AND EXCHANGE COMMISSION",
+                                    "SCB|The Securities Commission of The Bahamas",
+                                    "SAAM|SWISS ASSOCIATION OF ASSET MANAGERS",
+                                    "PHLX|Philadelphia Stock Exchange",
+                                    "PFTS|PFTS Stock Exchange, Ukraine",
+                                    "OSFI|Office of the Superintendent of Financial Institutions Canada",
+                                    "OSFI|Office of the Superintendent of Financial Institutions Canada",
+                                    "OSC|ONTARIO SECURITIES COMMISION",
+                                    "OARG|ORGANISME D'AUTOREGULATION",
+                                    "NZFSP|New Zealand Financial Services Provider Register",
+                                    "NFA|NATIONAL FUTURES ASSOCIATION",
+                                    "MFSA|Malta Financial Services Authority",
+                                    "MAS|MONETARY AUTHORITY OF SINGAPORE",
+                                    "LISTED|Listed on regulated exchange",
+                                    "JFSC|Jersey Financial Services Commission",
+                                    "IOM FSC|Isle of Man Financial Supervision Commission",
+                                    "INAF|Institut Nacional Andorra De Finances",
+                                    "IFS|IRISH FINANCIAL SERVICES REGULATOR",
+                                    "HCMC|Hellenic Capital Market Commission",
+                                    "GOVERNMENT|GOVT PENSION FUND",
+                                    "GFSC|Guernsey Financial Services Commission",
+                                    "Finansinspektionen|Swedish Financial Supervisory Authority",
+                                    "Financial Supervisory Service of Korea|Financial Supervisory Service of Korea",
+                                    "FSS Korea|Financial Supervisory Service of Korea",
+                                    "FSCM|Financial Services Commission of Mauritius",
+                                    "FSCB|Financial Supervision Commission of Bulgaria",
+                                    "FSC|Financial Services Commission of Gibraltar",
+                                    "FSB|Financial Services Board South Africa",
+                                    "FSAN|The Financial Supervisory Authority of Norway",
+                                    "FSAJP|Financial Services Agency Japan",
+                                    "FMSA|Financial Market Stabilisation Agency",
+                                    "FMA|Financial Market Authority Liechtenstein",
+                                    "FINRA|FINANCIAL INDUSTRY REGULATORY AUTHORITY",
+                                    "FINMA|Swiss Financial Market Supervisory Authority",
+                                    "FCA|FINANCIAL CONDUCT AUTHORITY",
+                                    "Danish FSA|Finanstilsynet",
+                                    "CSSF|Commission de Surveillance du Secteur Financier - Luxembourg",
+                                    "CSEC|Cyprus Securities and Exchange Commission",
+                                    "CSA|Canadian Securities Administrators",
+                                    "CNMV|Comisión Nacional del Mercado de Valores",
+                                    "CIMA|Cayman Islands Monetary Authority",
+                                    "CCAF|Commission de Controle des Activities Financiers",
+                                    "CBOE|CHICAGO BOARD OPTIONS EXCHANGE",
+                                    "CBIE|Central Bank of Ireland",
+                                    "BVIFSC|British Virgin Islands Financial Services Commission",
+                                    "BOS|BANK OF SLOVENIA",
+                                    "BMA|Bermuda Monetary Authority",
+                                    "BI|BANK D\'ITALIA",
+                                    "BF|Banque de France",
+                                    "BDP|Banco De Portugal",
+                                    "BDE|Banco De Espana",
+                                    "BAFIN|German Federal Financial Supervisory Authority",
+                                    "ATVP|Securities Market Agency Slovenia",
+                                    "ATVP|Securities Market Agency Slovenia",
+                                    "ASIC|AUSTRALIAN SECURITIES & INVESTMENTS COMMISSION",
+                                    "AMF|AUTORITE DES MARCHES FINANCIERS",
+                                    "AFM|Netherlands Authority For the Financial Markets"
+                                ]
+                        }
                     },
 
                     "im_prop_assets": {
@@ -373,8 +428,10 @@
                         "default": "undefined"
                     },
                     "im_prop_regulator_no": {
-                        type: "string",
-                        title: "Regulator number"
+                        type: "integer",
+                        title: "Regulator number",
+                        minimum: 10000000,
+                        maximum: 99999999
                     },
                     "im_oasys_account": {
                         type: "string",
@@ -412,7 +469,8 @@
             , layout_schema: {
                 "groups": [
                   {
-                      "Id": "LeftTopGroup",
+                      "Id": "LeftTopGroup", 
+                      
                       "OtherFields": true,
                       "Fields": [
                         {
@@ -541,63 +599,75 @@
                       type: "container",
                       "attributes": [
                         {
-                            "name": "style",
-                            "value": "float: left;"
+                            "name": "class",
+                            "value": "improp-root-element"
                         }
                       ],
                       "childBlocks": [
+                       {
+                            type: "container",
+                            "attributes": [
+                                {
+                                    "name": "style",
+                                    "value": "float: left;"
+                                }
+                            ],
+                            "childBlocks": [
+                                {
+                                    type: "group",
+                                    "RefId": "LeftTopGroup"
+                                },
+                                {
+                                    type: "separator"
+                                },
+                                {
+                                    type: "group",
+                                    title: "Registered Address:",
+                                    "RefId": "LeftMiddleGroup"
+                                },
+                                {
+                                    type: "separator"
+                                },
+                                {
+                                    type: "group",
+                                    title: "Business Address:",
+                                    "RefId": "LeftBottomGroup"
+                                }
+                            ]
+                        },
                         {
-                            type: "group",
-                            "RefId": "LeftTopGroup"
+                            type: "container",
+                            "attributes": [
+                                {
+                                    "name": "style",
+                                    "value": "float: right;"
+                                }
+                            ],
+                            "childBlocks": [
+                                {
+                                    type: "group",
+                                    "RefId": "RightTopGroup"
+                                },
+                                {
+                                    type: "separator"
+                                },
+                                {
+                                    type: "group",
+                                    title: "Oasys Global Details",
+                                    "RefId": "RightBottomGroup"
+                                }
+                            ]
                         },
                         {
                             type: "separator"
                         },
                         {
                             type: "group",
-                            title: "Registered Address:",
-                            "RefId": "LeftMiddleGroup"
-                        },
-                        {
-                            type: "separator"
-                        },
-                        {
-                            type: "group",
-                            title: "Business Address:",
-                            "RefId": "LeftBottomGroup"
+                            renderAs: "tabs",
+                            "RefId": "BottomGroup"
                         }
                       ]
-                  },
-                  {
-                      type: "container",
-                      "attributes": [
-                        {
-                            "name": "style",
-                            "value": "float: right;"
-                        }
-                      ],
-                      "childBlocks": [
-                        {
-                            type: "group",
-                            "RefId": "RightTopGroup"
-                        },
-                        {
-                            type: "separator"
-                        },
-                        {
-                            type: "group",
-                            title: "Oasys Global Details",
-                            "RefId": "RightBottomGroup"
-                        }
-                      ]
-                  },
-                {
-                    type: "separator"
-                },
-                {
-                    type: "group",
-                    "RefId": "BottomGroup"
-                }
+                  }
                 ]
             }
         });

@@ -268,6 +268,7 @@ JSONEditor.defaults.resolvers.unshift(function(schema) {
     if(window.FileReader) return "upload";
   }
 });
+
 // Use the table editor for arrays with the format set to `table`
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   // Type `array` with format set to `table`
@@ -303,8 +304,17 @@ JSONEditor.defaults.resolvers.unshift(function(schema) {
     }
   }
 });
+
 // Use the multiple editor for schemas with `oneOf` set
 JSONEditor.defaults.resolvers.unshift(function(schema) {
   // If this schema uses `oneOf`
   if(schema.oneOf) return "multiple";
+});
+
+
+// Autocomplete
+JSONEditor.defaults.resolvers.unshift(function(schema) {  
+  if(window.autoComplete && schema.type === "string" && schema.format === "autocomplete"  && schema.options) {
+    return "autocomplete";
+  }
 });

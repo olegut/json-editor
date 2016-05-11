@@ -293,7 +293,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.header.textContent = this.getTitle();
             this.title = this.theme.getHeader(this.header);
             if (layoutSchemaIsUsed && this.container.firstChild) {
-                this.container.insertBefore(this.title, this.container.firstChild)
+                this.container.insertBefore(this.title, this.container.firstChild); 
             } else {
                 this.container.appendChild(this.title);
             }
@@ -395,6 +395,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             }
 
             $each(this.editors, function (key, editor) {
+                debugger;
                 var layoutHolder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(editor);
                 if (layoutSchemaIsUsed && layoutHolder) {
                     var editorHolder = self.theme.getGridColumn();

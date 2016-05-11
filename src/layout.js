@@ -57,6 +57,7 @@
                 var header = document.createElement('span');
                 header.textContent = block.title;
                 var title = this.options.theme.getHeader(header);
+                title.setAttribute("class","layout-block-title");
                 container.appendChild(title);
             }
             if (block.attributes) {
@@ -100,8 +101,12 @@ JSONEditor.LayoutBuilder.blocks.group = Class.extend({
     init: function (options) {
         this.options = options;
     },
-    createContainer: function () {
-        var container = this.options.theme.getIndentedPanel();
+    createContainer: function (block) {
+        var container;
+        if(block.renderAs == "tabs")
+            container = this.options.theme.getTabHolder();
+        else
+            container = this.options.theme.getIndentedPanel();
         return container;
     }
 }); 
