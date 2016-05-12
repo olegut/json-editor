@@ -246,17 +246,17 @@ JSONEditor.prototype = {
 
 
     this.root_container = this.theme.getContainer();
-
-    this.layout_builder = new JSONEditor.LayoutBuilder({
+    this.layout_container = this.theme.getContainer();
+    
+    this.layout_builder = new JSONEditor.RootLayoutBuilder({
         theme: this.theme,
         layout_schema: this.layout_schema,
-        root_container: this.root_container
+        root_container: this.layout_container
     });
 
-    this.root_container = this.theme.getContainer();
 
     if (this.layout_schema !== undefined) {
-        this.layout_container = this.layout_builder._rootContainer;
+        
         this.root_container.appendChild(this.layout_container);
     }
 
@@ -1393,10 +1393,37 @@ JSONEditor.Validator = Class.extend({
   }
 });
 
-JSONEditor.LayoutBuilder = Class.extend({
-    init: function (options) {
+JSONEditor.LayoutBuilder = {};
+
+JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
+    init: function (options, block, parentBlock) {
         this.options = options;
-        this._rootContainer = this.options.theme.getContainer();
+        this.block = block;
+        if(this.block)
+            this.block.builder = this;
+        this.parentBlock = parentBlock;
+        this.container = {};        
+    },
+    buildContainer: function(){
+        var self = this;
+        if (this.block.title) {
+            var header = document.createElement('span');
+            header.textContent = this.block.title;
+            var title = this.options.theme.getHeader(header);
+            title.setAttribute("class","layout-block-title");
+            this.container.root.appendChild(title);
+        }
+        if (this.block.attributes) {
+            $each(this.block.attributes, function (i, attribute) {
+                self.container.root.setAttribute(attribute.name, attribute.value);
+            });
+        }
+    },
+    buildEditorHolder: function(editor){
+        return this.options.theme.getGridColumn();
+    },
+    attachChildBlock: function(childBlock){
+        this.container.root.appendChild(childBlock.container.root);         
     },
     getGroupForEditor: function (editor) {
         if (!this.options.layout_schema) {
@@ -1426,37 +1453,17 @@ JSONEditor.LayoutBuilder = Class.extend({
             return foundGroup;
         }
     },
-    buildLayout: function () {
+    _buildBlock: function () {
         var self = this;
-        $each(this.options.layout_schema.layout, function (i, block) {
-            self._buildBlock(block, null);
+        this.block.container = this.buildContainer()
+        $each(this.block.childBlocks, function (i, innerBlock) {
+            var builder = new JSONEditor.LayoutBuilder.builders[innerBlock.type](self.options, innerBlock, self.block);
+            builder._buildBlock();
         });
-    },
-    _buildBlock: function (block, parentBlock) {
-        var self = this;
-        var currentBlockContainer = this._constructBlockContainer(block);
-        $each(block.childBlocks, function (i, innerBlock) {
-            innerBlock.parentBlock = block; // ??
-            self._buildBlock(innerBlock, block);
-        });
-        if (block.type == "group") {
-            var group = this._findGroup(block.RefId);
-            group.container = currentBlockContainer;
-            group.block = block;
-            group.container.root.setAttribute("id",group.Id);
-        }
-        
-        if(parentBlock && parentBlock.builder.attachChildBlock){
-            parentBlock.builder.attachChildBlock(block);
+        if(this.parentBlock && this.parentBlock.builder.attachChildBlock){
+            this.parentBlock.builder.attachChildBlock(this.block);
         } else
-            self._rootContainer.appendChild(currentBlockContainer.root);
-    },
-    _constructBlockContainer: function (block) {
-        if (JSONEditor.LayoutBuilder.blocks[block.type]) {
-            block.builder = new JSONEditor.LayoutBuilder.blocks[block.type](this.options, block);
-            block.container = block.builder.buildContainer();            
-            return block.container;
-        }
+            self.options.root_container.appendChild(this.block.container.root);
     },
     _findGroup: function (refId) {
         var self = this;
@@ -1471,43 +1478,25 @@ JSONEditor.LayoutBuilder = Class.extend({
             throw "Invalid layout schema. Unable to find group with id=" + refId;
         }
         return result;
-    }
+    }    
 });
 
-JSONEditor.LayoutBuilder.AbstractBlock = Class.extend({
-    init: function (options, block) {
-        this.options = options;
-        this.block = block;
-        this.container = {};        
-    },
-    buildContainer: function(){
+JSONEditor.RootLayoutBuilder =JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
+    init: function (options) {
+        this._super(options);
+    },   
+    buildLayout: function () {
         var self = this;
-        if (this.block.title) {
-            var header = document.createElement('span');
-            header.textContent = this.block.title;
-            var title = this.options.theme.getHeader(header);
-            title.setAttribute("class","layout-block-title");
-            this.container.root.appendChild(title);
-        }
-        if (this.block.attributes) {
-            $each(this.block.attributes, function (i, attribute) {
-                self.container.root.setAttribute(attribute.name, attribute.value);
-            });
-        }
-    },
-    buildEditorHolder: function(editor){
-            // group.container.editor_holders.appendChild(editorHolder);
-    // editor.setContainer(editorHolder);
-        return this.options.theme.getGridColumn();
-    },
-    attachChildBlock: function(childBlock){
-        this.container.root.appendChild(childBlock.container.root);         
-    }
+        $each(this.options.layout_schema.layout, function (i, block) {
+            var builder = new JSONEditor.LayoutBuilder.builders[block.type](self.options, block);
+            builder._buildBlock();
+        });
+    }    
 });
 
-JSONEditor.LayoutBuilder.blocks = {};
+JSONEditor.LayoutBuilder.builders = {};
 
-JSONEditor.LayoutBuilder.blocks.separator = JSONEditor.LayoutBuilder.AbstractBlock.extend({
+JSONEditor.LayoutBuilder.builders.separator = JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
     buildContainer: function () {
         var separator = document.createElement("div");
         separator.setAttribute("style", "display:block; clear: both;");
@@ -1519,17 +1508,26 @@ JSONEditor.LayoutBuilder.blocks.separator = JSONEditor.LayoutBuilder.AbstractBlo
     }
 });
 
-JSONEditor.LayoutBuilder.blocks.group = JSONEditor.LayoutBuilder.AbstractBlock.extend({
+JSONEditor.LayoutBuilder.builders.group = JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
     buildContainer: function () {
         this.container.editor_holders = this.options.theme.getIndentedPanel();
         this.container.root = this.container.editor_holders;
         this._super();
         return this.container;
+    },
+    _buildBlock: function () {
+        this._super();
+        var group = this._findGroup(this.block.RefId);
+        group.container = this.container;
+        group.builder = this;
+        group.container.root.setAttribute("id",group.Id);
     }
 }); 
 
- 
-JSONEditor.LayoutBuilder.blocks.container = JSONEditor.LayoutBuilder.AbstractBlock.extend({
+JSONEditor.LayoutBuilder.builders.container = JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
+    // _buildBlock: function(){
+    //     
+    // },
     buildContainer: function () {
         if(this.block.renderAs == "tabs") {
             this.container.root = this.options.theme.getTabHolder();
@@ -2936,12 +2934,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
 
             $each(this.editors, function (key, editor) {
                 var group = self.jsoneditor.layout_builder.getGroupForEditor(editor);
-                if (layoutSchemaIsUsed) {
-                    var editorHolder = group.block.builder.buildEditorHolder(editor);
+                if (layoutSchemaIsUsed && group) {
+                    var editorHolder = group.builder.buildEditorHolder(editor);
                     group.container.editor_holders.appendChild(editorHolder);
                     editor.setContainer(editorHolder);
                 } else {
-                    debugger;
                     var holder = self.theme.getGridColumn();
                     // not sure that this is realy required 
                     if (self.options.table_row) {

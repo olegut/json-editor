@@ -397,12 +397,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
 
             $each(this.editors, function (key, editor) {
                 var group = self.jsoneditor.layout_builder.getGroupForEditor(editor);
-                if (layoutSchemaIsUsed) {
-                    var editorHolder = group.block.builder.buildEditorHolder(editor);
+                if (layoutSchemaIsUsed && group) {
+                    var editorHolder = group.builder.buildEditorHolder(editor);
                     group.container.editor_holders.appendChild(editorHolder);
                     editor.setContainer(editorHolder);
                 } else {
-                    debugger;
                     var holder = self.theme.getGridColumn();
                     // not sure that this is realy required 
                     if (self.options.table_row) {

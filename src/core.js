@@ -33,17 +33,17 @@ JSONEditor.prototype = {
 
 
     this.root_container = this.theme.getContainer();
-
-    this.layout_builder = new JSONEditor.LayoutBuilder({
+    this.layout_container = this.theme.getContainer();
+    
+    this.layout_builder = new JSONEditor.RootLayoutBuilder({
         theme: this.theme,
         layout_schema: this.layout_schema,
-        root_container: this.root_container
+        root_container: this.layout_container
     });
 
-    this.root_container = this.theme.getContainer();
 
     if (this.layout_schema !== undefined) {
-        this.layout_container = this.layout_builder._rootContainer;
+        
         this.root_container.appendChild(this.layout_container);
     }
 

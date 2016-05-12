@@ -228,35 +228,35 @@ JSONEditor.defaults.options.disable_collapse = true;
                             }
                         }
                     },
-                    // "location": {
-                    //     type: "object",
-                    //     title: "Location Parent Object",
-                    //     properties: {
-                    //         "location_nested": {
-                    //             type: "object",
-                    //             title: "Location (nested)",
-                    //             properties: {
-                    //                 "city": {
-                    //                     type: "string",
-                    //                     "default": "San Francisco"
-                    //                 },
-                    //                 "state": {
-                    //                     type: "string",
-                    //                     "default": "CA"
-                    //                 },
-                    //                 "citystate": {
-                    //                     type: "string",
-                    //                     "description": "This is generated automatically from the previous two fields (inner)",
-                    //                     "template": "{{city}}, {{state}}",
-                    //                     "watch": {
-                    //                         "city": "location.location_nested.city",
-                    //                         "state": "location.location_nested.state"
-                    //                     }
-                    //                 }
-                    //             }
-                    //         },
-                    //     }
-                    // },
+                    "location": {
+                        type: "object",
+                        title: "Location Parent Object",
+                        properties: {
+                            "location_nested": {
+                                type: "object",
+                                title: "Location (nested)",
+                                properties: {
+                                    "city": {
+                                        type: "string",
+                                        "default": "San Francisco"
+                                    },
+                                    "state": {
+                                        type: "string",
+                                        "default": "CA"
+                                    },
+                                    "citystate": {
+                                        type: "string",
+                                        "description": "This is generated automatically from the previous two fields (inner)",
+                                        "template": "{{city}}, {{state}}",
+                                        "watch": {
+                                            "city": "location.location_nested.city",
+                                            "state": "location.location_nested.state"
+                                        }
+                                    }
+                                }
+                            },
+                        }
+                    },
                     "mpf_name": {
                         type: "string",
                         title: "IM PROP Name"
