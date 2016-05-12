@@ -371,20 +371,20 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.error_holder = document.createElement('div');
             this.container.appendChild(this.error_holder);
 
-            if (layoutSchemaIsUsed) {
+            var group = self.jsoneditor.layout_builder.getGroupForEditor(self);
+            if (layoutSchemaIsUsed && group) {
                 if (self.key == "root") {
                     this.layout_holder = this.jsoneditor.layout_container;
                     this.editor_holder = this.jsoneditor.layout_container;
                 } else {
-                    var group = self.jsoneditor.layout_builder.getGroupForEditor(self);
-                    this.layout_holder = group.container.editor_holders;
-                    if (!this.layout_holder) {
-                        this.layout_holder = this.container;
-                    }
-                    this.editor_holder = this.theme.getIndentedPanel();
-                    this.row_container = this.theme.getGridContainer();
-                    this.editor_holder.appendChild(this.row_container);
-                    this.layout_holder.appendChild(this.editor_holder);
+                        this.layout_holder = group.container.editor_holders;
+                        if (!this.layout_holder) {
+                            this.layout_holder = this.container;
+                        }
+                        this.editor_holder = this.theme.getIndentedPanel();
+                        this.row_container = this.theme.getGridContainer();
+                        this.editor_holder.appendChild(this.row_container);
+                        this.layout_holder.appendChild(this.editor_holder);                                                
                 }
             } else {
                 this.editor_holder = this.theme.getIndentedPanel();

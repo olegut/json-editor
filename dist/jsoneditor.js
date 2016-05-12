@@ -1405,14 +1405,16 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
         this.container = {};        
     },
     buildContainer: function(){
-        var self = this;
-        if (this.block.title) {
+        if (this.block.title && !this.ignoreTitle) {
             var header = document.createElement('span');
             header.textContent = this.block.title;
             var title = this.options.theme.getHeader(header);
             title.setAttribute("class","layout-block-title");
             this.container.root.appendChild(title);
         }
+    },
+    afterBuildContainer: function(){
+        var self = this;
         if (this.block.attributes) {
             $each(this.block.attributes, function (i, attribute) {
                 self.container.root.setAttribute(attribute.name, attribute.value);
@@ -1454,8 +1456,9 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
         }
     },
     _buildBlock: function () {
-        var self = this;
-        this.block.container = this.buildContainer()
+        var self = this;        
+        this.block.container = this.buildContainer();
+        this.afterBuildContainer();
         $each(this.block.childBlocks, function (i, innerBlock) {
             var builder = new JSONEditor.LayoutBuilder.builders[innerBlock.type](self.options, innerBlock, self.block);
             builder._buildBlock();
@@ -1525,30 +1528,81 @@ JSONEditor.LayoutBuilder.builders.group = JSONEditor.LayoutBuilder.AbstractLayou
 }); 
 
 JSONEditor.LayoutBuilder.builders.container = JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
-    // _buildBlock: function(){
-    //     
-    // },
     buildContainer: function () {
-        if(this.block.renderAs == "tabs") {
-            this.container.root = this.options.theme.getTabHolder();
-            this.container.editor_holders = this.options.theme.getTabContentHolder(this.container.root);
-            var tab = this.options.theme.getTab(document.createElement('span'));
-        }
-        else {
-            this.container.editor_holders = this.options.theme.getIndentedPanel();
-            this.container.root = this.container.editor_holders;
-        }
+        this.container.editor_holders = this.options.theme.getIndentedPanel();
+        this.container.root = this.container.editor_holders;
         this._super();  
         return this.container;
-    },
-    buildEditorHolder: function(editor){
-        return this._super();            
-    },
-    attachChildBlock: function(childBlock){
-        this.container.root.appendChild(childBlock.container.root);         
     }
 });
 
+JSONEditor.LayoutBuilder.builders.tab_container = JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
+    init: function (options, block, parentBlock) {
+        this.active_tab = null;
+        this.tabs = [];
+        this._super(options, block, parentBlock);
+    },    
+    buildContainer: function () {
+        this.container.root = this.options.theme.getIndentedPanel();
+        this.tab_holder =  this.options.theme.getTabHolder(); // tab holder
+        this.container.root.appendChild(this.tab_holder);
+        
+        this.container.editor_holders = this.tab_holder;
+        this.container.tab_content_holder = this.options.theme.getTabContentHolder(this.tab_holder);
+        this._super();  
+        return this.container;
+    },
+    attachChildBlock: function(childBlock){
+        this.container.tab_content_holder.appendChild(childBlock.container.root);         
+    },
+    registerTab: function(tab, tabContent){
+        var self = this;
+        this.options.theme.addTab(this.tab_holder, tab);
+        tab.addEventListener('click', function(e) {
+            self.active_tab = tab;
+            self.refreshTabs();
+            e.preventDefault();
+            e.stopPropagation();
+        });        
+        this.tabs.push({
+            tab: tab,
+            tabContent:tabContent
+        });
+        if(!this.active_tab)
+            this.active_tab = tab;
+        this.refreshTabs();
+    },
+    refreshTabs: function(){
+        var self = this;
+        $each(this.tabs, function (i, tab_object) {
+            if(tab_object.tab === self.active_tab) {
+                self.options.theme.markTabActive(tab_object.tab);
+                tab_object.tabContent.style.display = '';
+            }
+            else {
+                self.options.theme.markTabInactive(tab_object.tab);
+                tab_object.tabContent.style.display = 'none';
+            }
+        });        
+    }
+});
+
+JSONEditor.LayoutBuilder.builders.tab = JSONEditor.LayoutBuilder.builders.group.extend({
+    init: function (options, block, parentBlock) {
+        this.ignoreTitle = true; 
+        this._super(options, block, parentBlock);
+    },
+    buildContainer: function () {
+        var title = document.createElement("span");
+        title.style.cursor = "pointer";
+        title.textContent = this.block.title;
+        this.tab = this.options.theme.getTab(title);
+        this.container.root = this.options.theme.getTabContent();
+        this.container.editor_holders = this.container.root;
+        this.parentBlock.builder.registerTab(this.tab,this.container.root);
+        return this.container;
+    }
+});
 /**
  * All editors should extend from this class
  */
@@ -2908,20 +2962,20 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.error_holder = document.createElement('div');
             this.container.appendChild(this.error_holder);
 
-            if (layoutSchemaIsUsed) {
+            var group = self.jsoneditor.layout_builder.getGroupForEditor(self);
+            if (layoutSchemaIsUsed && group) {
                 if (self.key == "root") {
                     this.layout_holder = this.jsoneditor.layout_container;
                     this.editor_holder = this.jsoneditor.layout_container;
                 } else {
-                    var group = self.jsoneditor.layout_builder.getGroupForEditor(self);
-                    this.layout_holder = group.container.editor_holders;
-                    if (!this.layout_holder) {
-                        this.layout_holder = this.container;
-                    }
-                    this.editor_holder = this.theme.getIndentedPanel();
-                    this.row_container = this.theme.getGridContainer();
-                    this.editor_holder.appendChild(this.row_container);
-                    this.layout_holder.appendChild(this.editor_holder);
+                        this.layout_holder = group.container.editor_holders;
+                        if (!this.layout_holder) {
+                            this.layout_holder = this.container;
+                        }
+                        this.editor_holder = this.theme.getIndentedPanel();
+                        this.row_container = this.theme.getGridContainer();
+                        this.editor_holder.appendChild(this.row_container);
+                        this.layout_holder.appendChild(this.editor_holder);                                                
                 }
             } else {
                 this.editor_holder = this.theme.getIndentedPanel();
