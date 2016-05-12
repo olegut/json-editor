@@ -376,7 +376,8 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                     this.layout_holder = this.jsoneditor.layout_container;
                     this.editor_holder = this.jsoneditor.layout_container;
                 } else {
-                    this.layout_holder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(self);
+                    var group = self.jsoneditor.layout_builder.getGroupForEditor(self);
+                    this.layout_holder = group.container.editor_holders;
                     if (!this.layout_holder) {
                         this.layout_holder = this.container;
                     }
@@ -395,19 +396,19 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             }
 
             $each(this.editors, function (key, editor) {
-                debugger;
-                var layoutHolder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(editor);
-                if (layoutSchemaIsUsed && layoutHolder) {
-                    var editorHolder = self.theme.getGridColumn();
-                    if (self.options.table_row) {
-                        layoutHolder = self.container;
-                        editorHolder = self.theme.getTableCell();
-                    }
-                    layoutHolder.appendChild(editorHolder);
+                var group = self.jsoneditor.layout_builder.getGroupForEditor(editor);
+                if (layoutSchemaIsUsed) {
+                    var editorHolder = group.block.builder.buildEditorHolder(editor);
+                    group.container.editor_holders.appendChild(editorHolder);
                     editor.setContainer(editorHolder);
                 } else {
+                    debugger;
                     var holder = self.theme.getGridColumn();
-                    self.row_container.appendChild(holder); 
+                    // not sure that this is realy required 
+                    if (self.options.table_row) {
+                         holder = self.theme.getTableCell();
+                    }
+                    self.row_container.appendChild(holder);
                     editor.setContainer(holder);
                 }
 

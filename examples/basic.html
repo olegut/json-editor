@@ -1,17 +1,23 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8" />
-    <script src="auto-complete.min.js"></script>
+    <!--<script src="auto-complete.min.js"></script>-->
     <link rel="stylesheet" href="auto-complete.css">
-    <script src="../dist/jsoneditor.js"></script>
-    <!--<link rel="stylesheet" id="theme_stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css">-->
 
-    <style >
-        .improp-root-element{
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="../dist/jsoneditor.js"></script>
+
+    <link rel="stylesheet" id="theme_stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css">
+
+    <style>
+        .improp-root-element {
             width: 90%;
             max-width: 800px;
         }
+        
         #editor_holder > div> h3 {
             font-family: Tahoma, Arial, 'MS Sans Serif';
             font-weight: bold;
@@ -22,48 +28,67 @@
             border-style: solid;
             border-width: 0px 0px 5px 0px;
         }
-        .improp-root-element label{
-            float:left;
+        
+        .improp-root-element label {
+            float: left;
             clear: left;
             min-width: 190px;
             font-family: Tahoma, Arial, 'MS Sans Serif';
             font-size: 10.6667px;
             font-style: normal;
             font-variant: normal;
-            font-weight:normal!important;
-        }       
-        .improp-root-element .form-control{
+            font-weight: normal!important;
+        }
+        
+        .improp-root-element .form-control {
             clear: both;
             min-height: 20px;
             padding: 2px;
-        } 
-        
-        .improp-root-element select{
-            max-width: 180px;
-        } 
-        
-        .layout-block-title{
-            font-size: 12px;
-            color:rgb(0, 0, 128);
-            display:table-cell;
-            font-family:Tahoma, Arial, 'MS Sans Serif';
-            font-size:10.6667px;
-            font-style:normal;
-            font-variant:normal;
-            font-weight:bold;
         }
         
-        .improp-root-element select{
+        .improp-root-element select {
             max-width: 180px;
-        } 
+        }
+        
+        .layout-block-title {
+            font-size: 12px;
+            color: rgb(0, 0, 128);
+            display: table-cell;
+            font-family: Tahoma, Arial, 'MS Sans Serif';
+            font-size: 10.6667px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: bold;
+        }
+        
+        .improp-root-element select {
+            max-width: 180px;
+        }
     </style>
 </head>
+
 <body>
     <div id='editor_holder'></div>
     <button id='submit'>Submit (console.log)</button>
-
+    <div class="tabbable tabs-right">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#rA" data-toggle="tab">Section 1</a></li>
+            <li class=""><a href="#rB" data-toggle="tab">Section 2</a></li>
+            <li class=""><a href="#rC" data-toggle="tab">Section 3</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="rA">
+                <p>I'm in Section A.</p>
+            </div>
+            <div class="tab-pane" id="rB">
+                <p>Howdy, I'm in Section B.</p>
+            </div>
+            <div class="tab-pane" id="rC">
+                <p>What up girl, this is Section C.</p>
+            </div>
+        </div>
+    </div>
     <script>
-
         // Specify upload handler
         JSONEditor.defaults.options.upload = function (type, file, cbs) {
             if (type === 'root.upload_fail') cbs.failure('Upload failed');
@@ -94,7 +119,7 @@ JSONEditor.defaults.options.disable_collapse = true;
   
         // Initialize the editor with a JSON schema
         var editor = new JSONEditor(document.getElementById('editor_holder'), {
-           // theme: 'bootstrap2',
+            theme: 'bootstrap2',
             schema: {
                 title: "IM PROP",
                 type: "object",
@@ -583,16 +608,21 @@ JSONEditor.defaults.options.disable_collapse = true;
                       ]
                   },
                   {
-                      "Id": "BottomGroup",
+                      "Id": "Tab1Group",
                       "Fields": [
                             {
                                 "Path": "root.documents"
-                            },
+                            }
+                      ]
+                  },
+                  {
+                      "Id": "Tab2Group",
+                      "Fields": [
                             {
                                 "Path": "root.notes"
                             }
                       ]
-                  }
+                  }                  
                 ],
                 "layout": [
                   {
@@ -662,9 +692,20 @@ JSONEditor.defaults.options.disable_collapse = true;
                             type: "separator"
                         },
                         {
-                            type: "group",
+                            type: "container",
                             renderAs: "tabs",
-                            "RefId": "BottomGroup"
+                            "childBlocks": [
+                                {
+                                    type: "group",
+                                    title: "Documents",                                    
+                                    "RefId": "Tab1Group"
+                                },
+                                {
+                                    type: "group",
+                                    title: "Notes",
+                                    "RefId": "Tab2Group"
+                                }
+                            ]                            
                         }
                       ]
                   }
@@ -679,4 +720,5 @@ JSONEditor.defaults.options.disable_collapse = true;
         });
     </script>
 </body>
+
 </html>

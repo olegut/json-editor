@@ -11,7 +11,7 @@ JSONEditor.defaults.editors.autocomplete = JSONEditor.defaults.editors.string.ex
   afterInputReady: function() {
   //  this.input.disabled = true;
     var self = this;
-    var demo2 = new autoComplete({
+    var demo2 = new window.autoComplete({
             selector: this.input,
             minChars: 0,
             source: function(term, suggest){

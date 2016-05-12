@@ -1398,7 +1398,7 @@ JSONEditor.LayoutBuilder = Class.extend({
         this.options = options;
         this._rootContainer = this.options.theme.getContainer();
     },
-    getLayoutHolderForEditor: function (editor) {
+    getGroupForEditor: function (editor) {
         if (!this.options.layout_schema) {
             return;
         }
@@ -1422,45 +1422,40 @@ JSONEditor.LayoutBuilder = Class.extend({
             } 
         });
         if (foundGroup) {
-            return foundGroup.container;
+            editor.group = foundGroup;
+            return foundGroup;
         }
     },
     buildLayout: function () {
         var self = this;
         $each(this.options.layout_schema.layout, function (i, block) {
-            self._buildBlock(block, self._rootContainer);
+            self._buildBlock(block, null);
         });
     },
-    _buildBlock: function (block, parentElement) {
+    _buildBlock: function (block, parentBlock) {
         var self = this;
         var currentBlockContainer = this._constructBlockContainer(block);
         $each(block.childBlocks, function (i, innerBlock) {
-            self._buildBlock(innerBlock, currentBlockContainer);
+            innerBlock.parentBlock = block; // ??
+            self._buildBlock(innerBlock, block);
         });
         if (block.type == "group") {
             var group = this._findGroup(block.RefId);
             group.container = currentBlockContainer;
-            group.container.setAttribute("id",group.Id);
+            group.block = block;
+            group.container.root.setAttribute("id",group.Id);
         }
-        parentElement.appendChild(currentBlockContainer);
+        
+        if(parentBlock && parentBlock.builder.attachChildBlock){
+            parentBlock.builder.attachChildBlock(block);
+        } else
+            self._rootContainer.appendChild(currentBlockContainer.root);
     },
     _constructBlockContainer: function (block) {
         if (JSONEditor.LayoutBuilder.blocks[block.type]) {
-            var builder = new JSONEditor.LayoutBuilder.blocks[block.type](this.options);
-            var container = builder.createContainer(block);
-            if (block.title) {
-                var header = document.createElement('span');
-                header.textContent = block.title;
-                var title = this.options.theme.getHeader(header);
-                title.setAttribute("class","layout-block-title");
-                container.appendChild(title);
-            }
-            if (block.attributes) {
-                $each(block.attributes, function (i, attribute) {
-                    container.setAttribute(attribute.name, attribute.value);
-                });
-            }
-            return container;
+            block.builder = new JSONEditor.LayoutBuilder.blocks[block.type](this.options, block);
+            block.container = block.builder.buildContainer();            
+            return block.container;
         }
     },
     _findGroup: function (refId) {
@@ -1479,41 +1474,80 @@ JSONEditor.LayoutBuilder = Class.extend({
     }
 });
 
-JSONEditor.LayoutBuilder.blocks = {};
-
-JSONEditor.LayoutBuilder.blocks.separator = Class.extend({
-    init: function (options) {
+JSONEditor.LayoutBuilder.AbstractBlock = Class.extend({
+    init: function (options, block) {
         this.options = options;
+        this.block = block;
+        this.container = {};        
     },
-    createContainer: function () {
-        var separator = document.createElement("div");
-        separator.setAttribute("style", "display:block; clear: both;");
-        return separator;
+    buildContainer: function(){
+        var self = this;
+        if (this.block.title) {
+            var header = document.createElement('span');
+            header.textContent = this.block.title;
+            var title = this.options.theme.getHeader(header);
+            title.setAttribute("class","layout-block-title");
+            this.container.root.appendChild(title);
+        }
+        if (this.block.attributes) {
+            $each(this.block.attributes, function (i, attribute) {
+                self.container.root.setAttribute(attribute.name, attribute.value);
+            });
+        }
+    },
+    buildEditorHolder: function(editor){
+            // group.container.editor_holders.appendChild(editorHolder);
+    // editor.setContainer(editorHolder);
+        return this.options.theme.getGridColumn();
+    },
+    attachChildBlock: function(childBlock){
+        this.container.root.appendChild(childBlock.container.root);         
     }
 });
 
-JSONEditor.LayoutBuilder.blocks.group = Class.extend({
-    init: function (options) {
-        this.options = options;
-    },
-    createContainer: function (block) {
-        var container;
-        if(block.renderAs == "tabs")
-            container = this.options.theme.getTabHolder();
-        else
-            container = this.options.theme.getIndentedPanel();
+JSONEditor.LayoutBuilder.blocks = {};
+
+JSONEditor.LayoutBuilder.blocks.separator = JSONEditor.LayoutBuilder.AbstractBlock.extend({
+    buildContainer: function () {
+        var separator = document.createElement("div");
+        separator.setAttribute("style", "display:block; clear: both;");
+        var container = {};
+        container.editor_holders = separator;
+        container.root = separator;
+        this._super();
         return container;
+    }
+});
+
+JSONEditor.LayoutBuilder.blocks.group = JSONEditor.LayoutBuilder.AbstractBlock.extend({
+    buildContainer: function () {
+        this.container.editor_holders = this.options.theme.getIndentedPanel();
+        this.container.root = this.container.editor_holders;
+        this._super();
+        return this.container;
     }
 }); 
 
  
-JSONEditor.LayoutBuilder.blocks.container = Class.extend({
-    init: function (options) {
-        this.options = options;
+JSONEditor.LayoutBuilder.blocks.container = JSONEditor.LayoutBuilder.AbstractBlock.extend({
+    buildContainer: function () {
+        if(this.block.renderAs == "tabs") {
+            this.container.root = this.options.theme.getTabHolder();
+            this.container.editor_holders = this.options.theme.getTabContentHolder(this.container.root);
+            var tab = this.options.theme.getTab(document.createElement('span'));
+        }
+        else {
+            this.container.editor_holders = this.options.theme.getIndentedPanel();
+            this.container.root = this.container.editor_holders;
+        }
+        this._super();  
+        return this.container;
     },
-    createContainer: function () {
-        var separator = this.options.theme.getIndentedPanel();
-        return separator;
+    buildEditorHolder: function(editor){
+        return this._super();            
+    },
+    attachChildBlock: function(childBlock){
+        this.container.root.appendChild(childBlock.container.root);         
     }
 });
 
@@ -2460,7 +2494,7 @@ JSONEditor.defaults.editors.autocomplete = JSONEditor.defaults.editors.string.ex
   afterInputReady: function() {
   //  this.input.disabled = true;
     var self = this;
-    var demo2 = new autoComplete({
+    var demo2 = new window.autoComplete({
             selector: this.input,
             minChars: 0,
             source: function(term, suggest){
@@ -2881,7 +2915,8 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                     this.layout_holder = this.jsoneditor.layout_container;
                     this.editor_holder = this.jsoneditor.layout_container;
                 } else {
-                    this.layout_holder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(self);
+                    var group = self.jsoneditor.layout_builder.getGroupForEditor(self);
+                    this.layout_holder = group.container.editor_holders;
                     if (!this.layout_holder) {
                         this.layout_holder = this.container;
                     }
@@ -2900,19 +2935,19 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             }
 
             $each(this.editors, function (key, editor) {
-                debugger;
-                var layoutHolder = self.jsoneditor.layout_builder.getLayoutHolderForEditor(editor);
-                if (layoutSchemaIsUsed && layoutHolder) {
-                    var editorHolder = self.theme.getGridColumn();
-                    if (self.options.table_row) {
-                        layoutHolder = self.container;
-                        editorHolder = self.theme.getTableCell();
-                    }
-                    layoutHolder.appendChild(editorHolder);
+                var group = self.jsoneditor.layout_builder.getGroupForEditor(editor);
+                if (layoutSchemaIsUsed) {
+                    var editorHolder = group.block.builder.buildEditorHolder(editor);
+                    group.container.editor_holders.appendChild(editorHolder);
                     editor.setContainer(editorHolder);
                 } else {
+                    debugger;
                     var holder = self.theme.getGridColumn();
-                    self.row_container.appendChild(holder); 
+                    // not sure that this is realy required 
+                    if (self.options.table_row) {
+                         holder = self.theme.getTableCell();
+                    }
+                    self.row_container.appendChild(holder);
                     editor.setContainer(holder);
                 }
 
