@@ -25,6 +25,9 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
                 self.container.root.setAttribute(attribute.name, attribute.value);
             });
         }
+        if (this.block.cssClass && typeof this.block.cssClass == "string") {
+            self.container.root.classList.add(this.block.cssClass);
+        }
     },
     buildEditorHolder: function(editor){
         return this.options.theme.getGridColumn();
