@@ -28,6 +28,11 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
         if (this.block.cssClass && typeof this.block.cssClass == "string") {
             self.container.root.classList.add(this.block.cssClass);
         }
+        if (this.block.cssClass && Object.prototype.toString.call(this.block.cssClass) === '[object Array]') {
+            $each(this.block.cssClass, function (i, cssClass) {
+                self.container.root.classList.add(cssClass);
+            });
+        }
     },
     buildEditorHolder: function(editor){
         return this.options.theme.getGridColumn();

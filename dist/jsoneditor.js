@@ -1423,6 +1423,11 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
         if (this.block.cssClass && typeof this.block.cssClass == "string") {
             self.container.root.classList.add(this.block.cssClass);
         }
+        if (this.block.cssClass && Object.prototype.toString.call(this.block.cssClass) === '[object Array]') {
+            $each(this.block.cssClass, function (i, cssClass) {
+                self.container.root.classList.add(cssClass);
+            });
+        }
     },
     buildEditorHolder: function(editor){
         return this.options.theme.getGridColumn();
@@ -2999,7 +3004,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 if(layoutSchemaIsUsed && !group && editor.parent.key == "root"){
                     // do nothing so far
                 } else
-                if (layoutSchemaIsUsed && group) {
+                if (layoutSchemaIsUsed && group && group.builder) {
                     var editorHolder = group.builder.buildEditorHolder(editor);
                     group.container.editor_holders.appendChild(editorHolder);
                     editor.setContainer(editorHolder);
@@ -3012,7 +3017,13 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                     self.row_container.appendChild(holder);
                     editor.setContainer(holder);
                 }
-
+                
+                // add fake container in case we're in layout mode and this editor
+                // is ignored
+                if(!editor.container && layoutSchemaIsUsed) {
+                    editor.container = document.createElement("div");
+                }
+                
                 editor.build();
                 editor.postBuild();
             });

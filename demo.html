@@ -20,16 +20,50 @@
     <script src='dist/jsoneditor.js'></script>
     <style>
         /* ------BEGIN------ */
-        /* FIXING TAB LAYOUT */
+        /* VERTICAL CHILD IM PROPS LAYOUT */
+  
+        .related-im-props-container .json-editor-btn-add,
+        .related-im-props-container .json-editor-btn-delete {
+            display: none;
+        }      
+          
+        .related-im-props-container .content,
+        .related-im-props-container h3 {
+            display: none;
+        }
         
-        .tabs {
+        .related-im-props-container div {
+            opacity: 1!important;
+        }
+        
+        .related-im-props-container span
+        {
+            color: -webkit-link;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        .related-im-props-container .form-control
+        {
+            display: none;
+            
+        }
+
+        
+        /* -------END------- */
+        
+        
+        /* ------BEGIN------ */
+        /* FIXING TAB LAYOUT */
+
+        .vertical-tab-container .tabs {
             float: none!important;
             width: auto!important;
             clear: both;
             padding: 5px;
         }
         
-        .tabs > div {
+        .vertical-tab-container .tabs > div {
             float: left;
             padding: 2px;
             border: solid rgb(221, 221, 221);
@@ -37,7 +71,7 @@
             border-radius: 3px;
         }
         
-        .content {
+        .vertical-tab-container .content {
             clear: both!important;
             float: none!important;
             margin-left: 0px!important;
@@ -404,7 +438,15 @@
                                 "Path": "root.mpf_companies25"
                             }
                       ]
-                  }                                                             
+                  },
+                  {
+                      "Id": "RelatedImPropsTabGroup",                      
+                      "Fields": [
+                            {
+                                "Path": "root.relatedIMProps"
+                            }
+                      ]
+                  }                                                                                                 
                 ],
                 "layout": [
                   {
@@ -416,8 +458,19 @@
                     //         "value": "improp-root-element"
                     //     }
                     //   ],
-                      "childBlocks": [
-                       {
+                       "childBlocks": [
+                    //     {
+                    //         type: "group",
+                    //         "cssClass": [
+                    //             "related-im-props-container",
+                    //             "vertical-tab-container",
+                    //         ],
+                    //         "RefId": "RelatedImPropsTabGroup"
+                    //     },
+                    //     {
+                    //         type: "separator"
+                    //     },
+                        {
                             type: "container",
                             "attributes": [
                                 {
@@ -425,7 +478,7 @@
                                     "value": "float: left;"
                                 }
                             ],
-                            "childBlocks": [
+                            "childBlocks": [                                
                                 {
                                     type: "group",
                                     "RefId": "LeftTopGroup"
@@ -476,6 +529,7 @@
                         },
                         {
                             type: "tab_container",
+                            cssClass: "vertical-tab-container",
                             "childBlocks": [
                                 {
                                     type: "tab",
@@ -496,6 +550,14 @@
                                     type: "tab",
                                     title: "Control over 25% (Companies)",
                                     "RefId": "Tab4Group"
+                                },
+                                {
+                                    type: "tab",
+                                    title: "Related IM Props",
+                                    "cssClass": [
+                                        "related-im-props-container"
+                                    ],
+                                    "RefId": "RelatedImPropsTabGroup"
                                 }                                
                             ]                            
                         }
@@ -507,96 +569,143 @@
     // Default starting schema
     if(!schema) {
         schema = {
-                title: "IM PROP",
-                type: "object",
-                properties: {                    
-                    mpf_companies25: {
-                        "type": "array",     
-                        title: "Control over 25% (Companies)",                   
-                        "uniqueItems": true,
-                        "items": {
-                            $ref: "#/definitions/master_prop_fund"
-                        }
-                    },
-                    mpf_people25: {
-                        "type": "array",     
-                        title: "Control over 25% (People)",                   
-                        "uniqueItems": true,
-                        "items": {
-                            $ref: "#/definitions/mpf_people25"
-                        }
-                    },
-                    "documents": {
-                        type: "array",
-                        //format: "table",
-                        title: "Documents",
-                        uniqueItems: true,
-                        items: {
-                            $ref: "#/definitions/document"                            
-                        }
-                    },
-                    "notes": {
-                        type: "array",
-                        // format: "table",
-                        title: "Notes",
-                        uniqueItems: true,
-                        items: {
-                            $ref: "#/definitions/note"       
-                        }
-                    },                                        
-                    "im_cat_id": {
-                        type: "string",
-                        title: "Category",
-                        "enum": [
-                            "Other",
-                            "Hedge Fund",
-                            "Fund Manager",
-                            "Bank Proprietary Trading Desk",
-                            "Hedge Fund – Prop Trading",
-                            "Broker",
-                            "Hedge Fund - Research Only",
-                            "Mutual Fund",
-                            "US Broker Dealer",
-                            "Govt Entity"
-                        ],
-                        "default": "undefined"
-                    },                                        
-                    "im_prop_assets": {
-                        type: "string",
-                        title: "Assets Under Management",
-                        "enum": [
-                            "Not Disclosed",
-                            "Less than 100 M",
-                            "More than 100 M",
-                            "Less than 50 M"
-                        ],
-                        "default": "undefined"
-                    },
-                    "im_prop_regulator_no": {
-                        type: "integer",
-                        title: "Regulator number",
-                        minimum: 10000000,
-                        maximum: 99999999
-                    },                    
-                    "_im_cc_bda": {
-                        type: "boolean",
-                        format: "checkbox",
-                        title: "CC BDA"
-                    },
-                    "_im_cc_usa": {
-                        type: "boolean",
-                        format: "checkbox",
-                        title: "CC USA"
-                    },
-                    master_prop_fund: {
-                        $ref: "#/definitions/master_prop_fund",
-                        title: "Company 25"
-                    },
-                    im_prop_oasys: {
-                        $ref: "#/definitions/im_prop_oasys"
-                    }        
-                },
+                     $ref: "#/definitions/im_prop"
+                ,
                 definitions: {
+                    im_prop: {
+                        title: "IM PROP",
+                        type: "object",
+                        properties: {     
+                            // relatedIMProps: {
+                            //     "type": "array",   
+                            //     "format": "tabs",
+                            //     title: "Related IM Props",                       
+                            //     "items": {
+                            //         headerTemplate:"{{self.name}}",     
+                            //         "type": "object",
+                            //         "properties": {
+                            //             "name": {
+                            //                 "type": "string"
+                            //             }
+                            //         }
+                            //     }
+                            // },   
+                            relatedIMProps: {
+                                "type": "array",   
+                               // "format": "tabs",
+                                title: "Related IM Props",                       
+                                "items": {
+                                    //headerTemplate:"{{self.name}}",     
+                                    "type": "object", 
+                                    "id": "related_im_prop_item",                                   
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "watch": {
+                                                "link_id": "related_im_prop_item.id",
+                                                "link_title": "related_im_prop_item.name",
+                                            },
+                                            // headerTemplate:"{{link_title}}",
+                                            "links": [
+                                                {
+                                                    "href": "/test/path/{{link_id}}",
+                                                    "rel": "{{link_title}}"                     
+                                                }
+                                            ]
+                                        },
+                                        "id": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },                 
+                            mpf_companies25: {
+                                "type": "array",     
+                                title: "Control over 25% (Companies)",                   
+                                "uniqueItems": true,
+                                "items": {
+                                    $ref: "#/definitions/master_prop_fund"
+                                }
+                            },
+                            mpf_people25: {
+                                "type": "array",     
+                                title: "Control over 25% (People)",                   
+                                "uniqueItems": true,
+                                "items": {
+                                    $ref: "#/definitions/mpf_people25"
+                                }
+                            },
+                            "documents": {
+                                type: "array",
+                                //format: "table",
+                                title: "Documents",
+                                uniqueItems: true,
+                                items: {
+                                    $ref: "#/definitions/document"                            
+                                }
+                            },
+                            "notes": {
+                                type: "array",
+                                // format: "table",
+                                title: "Notes",
+                                uniqueItems: true,
+                                items: {
+                                    $ref: "#/definitions/note"       
+                                }
+                            },                                        
+                            "im_cat_id": {
+                                type: "string",
+                                title: "Category",
+                                "enum": [
+                                    "Other",
+                                    "Hedge Fund",
+                                    "Fund Manager",
+                                    "Bank Proprietary Trading Desk",
+                                    "Hedge Fund – Prop Trading",
+                                    "Broker",
+                                    "Hedge Fund - Research Only",
+                                    "Mutual Fund",
+                                    "US Broker Dealer",
+                                    "Govt Entity"
+                                ],
+                                "default": "undefined"
+                            },                                        
+                            "im_prop_assets": {
+                                type: "string",
+                                title: "Assets Under Management",
+                                "enum": [
+                                    "Not Disclosed",
+                                    "Less than 100 M",
+                                    "More than 100 M",
+                                    "Less than 50 M"
+                                ],
+                                "default": "undefined"
+                            },
+                            "im_prop_regulator_no": {
+                                type: "integer",
+                                title: "Regulator number",
+                                minimum: 10000,
+                                maximum: 99999999
+                            },                    
+                            "_im_cc_bda": {
+                                type: "boolean",
+                                format: "checkbox",
+                                title: "CC BDA"
+                            },
+                            "_im_cc_usa": {
+                                type: "boolean",
+                                format: "checkbox",
+                                title: "CC USA"
+                            },
+                            master_prop_fund: {
+                                $ref: "#/definitions/master_prop_fund",
+                                title: "Company 25"
+                            },
+                            im_prop_oasys: {
+                                $ref: "#/definitions/im_prop_oasys"
+                            }   
+                        }
+                    },
                     // IS NOT USED IN THIS SCHEME, but is used for fund_administrator
                     fund_administrator: {
                         "type": "object",
@@ -642,7 +751,7 @@
                                 type: "string",
                                 title: "Oasis block?",
                                 "enum": [
-                                    "Other",
+                                    "Block",
                                     "Allocation"
                                 ],
                                 "default": "undefined"
@@ -1012,7 +1121,8 @@
         jsoneditor = new JSONEditor($editor,{
             schema: schema,
             layout_schema: layout_schema, 
-            startval: startval
+            startval: startval,
+            show_errors: "always"
         });
         window.jsoneditor = jsoneditor;
 

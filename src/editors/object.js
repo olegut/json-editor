@@ -405,7 +405,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 if(layoutSchemaIsUsed && !group && editor.parent.key == "root"){
                     // do nothing so far
                 } else
-                if (layoutSchemaIsUsed && group) {
+                if (layoutSchemaIsUsed && group && group.builder) {
                     var editorHolder = group.builder.buildEditorHolder(editor);
                     group.container.editor_holders.appendChild(editorHolder);
                     editor.setContainer(editorHolder);
@@ -418,7 +418,13 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                     self.row_container.appendChild(holder);
                     editor.setContainer(holder);
                 }
-
+                
+                // add fake container in case we're in layout mode and this editor
+                // is ignored
+                if(!editor.container && layoutSchemaIsUsed) {
+                    editor.container = document.createElement("div");
+                }
+                
                 editor.build();
                 editor.postBuild();
             });
