@@ -443,7 +443,7 @@
                       "Id": "RelatedImPropsTabGroup",                      
                       "Fields": [
                             {
-                                "Path": "root.relatedIMProps"
+                                "Path": "root.imPropGroup.relatedImProps"
                             }
                       ]
                   }                                                                                                 
@@ -573,52 +573,12 @@
                 ,
                 definitions: {
                     im_prop: {
-                        title: "IM PROP",
+                        title: "IM PROP", 
                         type: "object",
                         properties: {     
-                            // relatedIMProps: {
-                            //     "type": "array",   
-                            //     "format": "tabs",
-                            //     title: "Related IM Props",                       
-                            //     "items": {
-                            //         headerTemplate:"{{self.name}}",     
-                            //         "type": "object",
-                            //         "properties": {
-                            //             "name": {
-                            //                 "type": "string"
-                            //             }
-                            //         }
-                            //     }
-                            // },   
-                            relatedIMProps: {
-                                "type": "array",   
-                               // "format": "tabs",
-                                title: "Related IM Props",                       
-                                "items": {
-                                    //headerTemplate:"{{self.name}}",     
-                                    "type": "object", 
-                                    "id": "related_im_prop_item",                                   
-                                    "properties": {
-                                        "name": {
-                                            "type": "string",
-                                            "watch": {
-                                                "link_id": "related_im_prop_item.id",
-                                                "link_title": "related_im_prop_item.name",
-                                            },
-                                            // headerTemplate:"{{link_title}}",
-                                            "links": [
-                                                {
-                                                    "href": "/test/path/{{link_id}}",
-                                                    "rel": "{{link_title}}"                     
-                                                }
-                                            ]
-                                        },
-                                        "id": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            },                 
+                            imPropGroup:{                                    
+                                $ref: "#/definitions/imPropGroup"
+                            },                                                                            
                             mpf_companies25: {
                                 "type": "array",     
                                 title: "Control over 25% (Companies)",                   
@@ -706,6 +666,51 @@
                             }   
                         }
                     },
+                    imPropGroup:{
+                                "type": "object",
+                                "properties": {
+                                // relatedImProps: {
+                                //     "type": "array",   
+                                //     "format": "tabs",
+                                //     title: "Related IM Props",                       
+                                //     "items": {
+                                //         headerTemplate:"{{self.name}}",     
+                                //         "type": "object",
+                                //         "properties": {
+                                //             "name": {
+                                //                 "type": "string"
+                                //             }
+                                //         }
+                                //     }
+                                // },                                    
+                                    "relatedImProps": {
+                                        "type": "array",   
+                                        title: "Related IM Props",                       
+                                        "items": {     
+                                            "type": "object", 
+                                            "id": "related_im_prop_item",                                   
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "watch": {
+                                                        "link_id": "related_im_prop_item.id",
+                                                        "link_title": "related_im_prop_item.name",
+                                                    },
+                                                    "links": [
+                                                        {
+                                                            "href": "/test/path/{{link_id}}",
+                                                            "rel": "{{link_title}}"                     
+                                                        }
+                                                    ]
+                                                },
+                                                "id": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                }    
+                            },
                     // IS NOT USED IN THIS SCHEME, but is used for fund_administrator
                     fund_administrator: {
                         "type": "object",
@@ -1000,7 +1005,8 @@
                                       {
                                           "href": "{{self}}"
                                       }
-                                    ]
+                                    ],
+                                    "default":""
                                 },
                                 "Category": {
                                     type: "autocomplete",
