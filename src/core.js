@@ -7,15 +7,36 @@ var JSONEditor = function(element,options) {
   this.options = options;
   this.init();
 };
+function isNormalInteger(str) {
+    var n = ~~Number(str);
+    return String(n) === str && n >= 0;
+}
 JSONEditor.prototype = {
   // necessary since we remove the ctor property by doing a literal assignment. Without this
   // the $isplainobject function will think that this is a plain object.
   constructor: JSONEditor,
-  init: function() {
+  getLayoutSchemaFor: function(editor){
     var self = this;
+    var result = undefined;
+    var path = editor.path;
+    // return parent layout schema for items inside the array 
+    if(isNormalInteger(editor.key)){
+      path = editor.parent.path;
+    }    
+    if(this.layout_schema){
+      $each(this.layout_schema.layout,function(i,schema) { 
+        if(schema.layoutFor == path){
+          result = schema;
+        }
+      });
+    }
+    return result;    
+  },
+  init: function() {
+    var self = this; 
     
     this.ready = false;
-
+    this.layout_builders = [];
     var theme_class = JSONEditor.defaults.themes[this.options.theme || JSONEditor.defaults.theme];
     if(!theme_class) throw "Unknown theme " + (this.options.theme || JSONEditor.defaults.theme);
     
@@ -31,21 +52,8 @@ JSONEditor.prototype = {
     var icon_class = JSONEditor.defaults.iconlibs[this.options.iconlib || JSONEditor.defaults.iconlib];
     if(icon_class) this.iconlib = new icon_class();
 
-
     this.root_container = this.theme.getContainer();
     this.layout_container = this.theme.getContainer();
-    
-    this.layout_builder = new JSONEditor.RootLayoutBuilder({
-        theme: this.theme,
-        layout_schema: this.layout_schema,
-        root_container: this.layout_container
-    });
-
-
-    if (this.layout_schema !== undefined) {
-        
-        this.root_container.appendChild(this.layout_container);
-    }
 
     this.element.appendChild(this.root_container);
     this.translate = this.options.translate || JSONEditor.defaults.translate;
@@ -69,9 +77,6 @@ JSONEditor.prototype = {
         required: true,
         container: self.root_container
       });
-      if (self.layout_builder.options.layout_schema) {
-          self.layout_builder.buildLayout();
-      }
 
       self.root.preBuild();
       self.root.build();

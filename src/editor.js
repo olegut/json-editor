@@ -4,7 +4,24 @@
 JSONEditor.AbstractEditor = Class.extend({
   onChildEditorChange: function(editor) {
     this.onChange(true);
+  },  
+  // consider unregistering when destroying the editor
+  registerLayoutBuilder: function(builder){
+    this.layout_builder = builder;
   },
+  getGroupForEditor: function(editor, defaultBuilder){
+      var result = undefined; 
+      if(this.layout_builder)
+        result = this.layout_builder.getGroupForEditor(editor);
+      // 1. look in current builder
+      if(result)
+        return result;
+      // 2. try to look in parent builders  
+      if(this.parent){
+        result = this.parent.getGroupForEditor(editor);
+      }
+      return result;
+  },  
   notify: function() {
     this.jsoneditor.notifyWatchers(this.path);
   },
@@ -30,7 +47,6 @@ JSONEditor.AbstractEditor = Class.extend({
   },
   init: function(options) {
     this.jsoneditor = options.jsoneditor;
-    
     this.theme = this.jsoneditor.theme;
     this.template_engine = this.jsoneditor.template;
     this.iconlib = this.jsoneditor.iconlib;
@@ -52,6 +68,7 @@ JSONEditor.AbstractEditor = Class.extend({
     this.link_watchers = [];
     
     if(options.container) this.setContainer(options.container);
+    
   },
   setContainer: function(container) {
     this.container = container;
@@ -61,7 +78,7 @@ JSONEditor.AbstractEditor = Class.extend({
   },
   
   preBuild: function() {
-
+    
   },
   build: function() {
     

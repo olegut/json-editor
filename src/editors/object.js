@@ -149,7 +149,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 }
             }
         }
-            // Normal layout
+        // Normal layout
         else {
             container = document.createElement('div');
             $each(this.property_order, function (i, key) {
@@ -226,12 +226,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             });
             this.no_link_holder = true;
         }
-            // If the object should be rendered as a table
+        // If the object should be rendered as a table
         else if (this.options.table) {
             // TODO: table display format
             throw "Not supported yet";
         }
-            // If the object should be rendered as a div
+        // If the object should be rendered as a div
         else {
             this.defaultProperties = this.schema.defaultProperties || Object.keys(this.schema.properties);
 
@@ -280,27 +280,32 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 }
             });
         }
-            // If the object should be rendered as a table
+        // If the object should be rendered as a table 
         else if (this.options.table) {
             // TODO: table display format
             throw "Not supported yet";
         }
-            // If the object should be rendered as a div
+        // If the object should be rendered as a div
         else {
-            var layoutSchemaIsUsed = this.jsoneditor.layout_schema !== undefined;
-            // add fake container in case we're in layout mode and this object
-            // is ignored
-            if(!this.container && layoutSchemaIsUsed) {
-                this.container = document.createElement("div");
-            }
             
+            this.layout_builder = new JSONEditor.RootLayoutBuilder({
+                theme: this.theme,
+                layout_schema: this.jsoneditor.getLayoutSchemaFor(this),
+                root_container: this.container
+            });
+
+            this.layout_builder.buildLayout();
+            this.registerLayoutBuilder(self.layout_builder)
+
             this.header = document.createElement('span');
             this.header.textContent = this.getTitle();
             this.title = this.theme.getHeader(this.header);
-            if (layoutSchemaIsUsed && this.container.firstChild) {
-                this.container.insertBefore(this.title, this.container.firstChild); 
-            } else {
-                this.container.appendChild(this.title);
+            if(!this.schema.hide_title) {
+                if (this.container.firstChild) {
+                    this.container.insertBefore(this.title, this.container.firstChild);
+                } else {
+                    this.container.appendChild(this.title);
+                }
             }
             this.container.style.position = 'relative';
 
@@ -362,7 +367,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.addproperty_holder.appendChild(this.addproperty_input);
             this.addproperty_holder.appendChild(this.addproperty_add);
             var spacer = document.createElement('div');
-            spacer.style.clear = 'both'; 
+            spacer.style.clear = 'both';
             this.addproperty_holder.appendChild(spacer);
 
 
@@ -376,55 +381,57 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.error_holder = document.createElement('div');
             this.container.appendChild(this.error_holder);
 
-            var group = self.jsoneditor.layout_builder.getGroupForEditor(self);
-            if (layoutSchemaIsUsed && group) {
+            var group = this.getGroupForEditor(self);
+            if (group) {
                 if (self.key == "root") {
                     this.layout_holder = this.jsoneditor.layout_container;
                     this.editor_holder = this.jsoneditor.layout_container;
                 } else {
-                        this.layout_holder = group.container.editor_holders;
-                        if (!this.layout_holder) {
-                            this.layout_holder = this.container;
-                        }
-                        this.editor_holder = this.theme.getIndentedPanel();
-                        this.row_container = this.theme.getGridContainer();
-                        this.editor_holder.appendChild(this.row_container);
-                        this.layout_holder.appendChild(this.editor_holder);                                                
+                    this.layout_holder = group.container.editor_holders;
+                    if (!this.layout_holder) {
+                        this.layout_holder = this.container;
+                    }
+                    this.editor_holder = this.theme.getIndentedPanel();
+                    this.row_container = this.theme.getGridContainer();
+                    this.editor_holder.appendChild(this.row_container);
+                    this.layout_holder.appendChild(this.editor_holder);
                 }
-            } else {
+            } else if(!this.layout_builder.options.layout_schema){
                 this.editor_holder = this.theme.getIndentedPanel();
                 // Container for child editor area
                 this.container.appendChild(this.editor_holder);
                 // Container for rows of child editors
                 this.row_container = this.theme.getGridContainer();
                 this.editor_holder.appendChild(this.row_container);
+            } else{
+                // do nothing so far? 
             }
-
+            
             $each(this.editors, function (key, editor) {
-                var group = self.jsoneditor.layout_builder.getGroupForEditor(editor);
-                if(layoutSchemaIsUsed && !group && editor.parent.key == "root"){
+                var group = self.getGroupForEditor(editor);
+                if (!group && editor.parent.key == "root") {
                     // do nothing so far
                 } else
-                if (layoutSchemaIsUsed && group && group.builder) {
-                    var editorHolder = group.builder.buildEditorHolder(editor);
-                    group.container.editor_holders.appendChild(editorHolder);
-                    editor.setContainer(editorHolder);
-                } else {
-                    var holder = self.theme.getGridColumn();
-                    // not sure that this is realy required 
-                    if (self.options.table_row) {
-                         holder = self.theme.getTableCell();
+                    if (group && group.builder) {
+                        var editorHolder = group.builder.buildEditorHolder(editor);
+                        group.container.editor_holders.appendChild(editorHolder);
+                        editor.setContainer(editorHolder);
+                    } else if(!self.layout_builder.options.layout_schema){
+                        var holder = self.theme.getGridColumn();
+                        // not sure that this is realy required 
+                        if (self.options.table_row) {
+                            holder = self.theme.getTableCell();
+                        }
+                        self.row_container.appendChild(holder);
+                        editor.setContainer(holder);
                     }
-                    self.row_container.appendChild(holder);
-                    editor.setContainer(holder);
-                }
                 
                 // add fake container in case we're in layout mode and this editor
                 // is ignored
-                if(!editor.container && layoutSchemaIsUsed) {
+                if (!editor.container) {
                     editor.container = document.createElement("div");
                 }
-                
+
                 editor.build();
                 editor.postBuild();
             });
@@ -506,7 +513,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 self.editor_holder.appendChild(self.editors[key].container);
             });
         }
-            // Layout object editors in grid if needed
+        // Layout object editors in grid if needed
         else {
             // Initial layout 
             this.layoutEditors();
@@ -663,7 +670,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             if (prebuild_only) return;
             this.editors[name].register();
         }
-            // New property
+        // New property
         else {
             if (!this.canHaveAdditionalProperties() && (!this.schema.properties || !this.schema.properties[name])) {
                 return;
@@ -815,16 +822,16 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.hideAddProperty();
             this.addproperty_controls.style.display = 'none';
         }
-            // If additional properties are disabled
+        // If additional properties are disabled
         else if (!this.canHaveAdditionalProperties()) {
             this.addproperty_add.style.display = 'none';
             this.addproperty_input.style.display = 'none';
         }
-            // If no new properties can be added
+        // If no new properties can be added
         else if (!can_add) {
             this.addproperty_add.disabled = true;
         }
-            // If new properties can be added
+        // If new properties can be added
         else {
             this.addproperty_add.disabled = false;
         }
@@ -848,11 +855,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 self.addObjectProperty(i);
                 editor.setValue(value[i], initial);
             }
-                // Otherwise, remove value unless this is the initial set or it's required
+            // Otherwise, remove value unless this is the initial set or it's required
             else if (!initial && !self.isRequired(editor)) {
                 self.removeObjectProperty(i);
             }
-                // Otherwise, set the value to the default
+            // Otherwise, set the value to the default
             else {
                 editor.setValue(editor.getDefault(), initial);
             }
@@ -894,7 +901,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                     self.error_holder.appendChild(self.theme.getErrorMessage(error.message));
                 });
             }
-                // Hide error area
+            // Hide error area
             else {
                 this.error_holder.style.display = 'none';
             }

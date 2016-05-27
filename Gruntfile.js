@@ -8,6 +8,7 @@ module.exports = function(grunt) {
       },
       target: {
         files: {
+          //'D:/Dev/MaxRav-v1.13.0.x/Src/UT.MaxRAV.Web/js/jsonEditor/jsoneditor.js': [
           'dist/jsoneditor.js': [
 
             // License & version info, start the containing closure
@@ -70,6 +71,8 @@ module.exports = function(grunt) {
     },
     uglify: {
       dist: {
+        // src: 'D:/Dev/MaxRav-v1.13.0.x/Src/UT.MaxRAV.Web/js/jsonEditor/jsoneditor.js',
+        // dest: 'D:/Dev/MaxRav-v1.13.0.x/Src/UT.MaxRAV.Web/js/jsonEditor/jsoneditor.min.js'
         src: 'dist/jsoneditor.js',
         dest: 'dist/jsoneditor.min.js'
       },
@@ -130,6 +133,7 @@ module.exports = function(grunt) {
           undef: true
         },
         files: {
+          //src: ['D:/Dev/MaxRav-v1.13.0.x/Src/UT.MaxRAV.Web/js/jsonEditor/jsoneditor.js']
           src: ['dist/jsoneditor.js']
         }
       }

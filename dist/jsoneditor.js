@@ -220,15 +220,36 @@ var JSONEditor = function(element,options) {
   this.options = options;
   this.init();
 };
+function isNormalInteger(str) {
+    var n = ~~Number(str);
+    return String(n) === str && n >= 0;
+}
 JSONEditor.prototype = {
   // necessary since we remove the ctor property by doing a literal assignment. Without this
   // the $isplainobject function will think that this is a plain object.
   constructor: JSONEditor,
-  init: function() {
+  getLayoutSchemaFor: function(editor){
     var self = this;
+    var result = undefined;
+    var path = editor.path;
+    // return parent layout schema for items inside the array 
+    if(isNormalInteger(editor.key)){
+      path = editor.parent.path;
+    }    
+    if(this.layout_schema){
+      $each(this.layout_schema.layout,function(i,schema) { 
+        if(schema.layoutFor == path){
+          result = schema;
+        }
+      });
+    }
+    return result;    
+  },
+  init: function() {
+    var self = this; 
     
     this.ready = false;
-
+    this.layout_builders = [];
     var theme_class = JSONEditor.defaults.themes[this.options.theme || JSONEditor.defaults.theme];
     if(!theme_class) throw "Unknown theme " + (this.options.theme || JSONEditor.defaults.theme);
     
@@ -244,21 +265,8 @@ JSONEditor.prototype = {
     var icon_class = JSONEditor.defaults.iconlibs[this.options.iconlib || JSONEditor.defaults.iconlib];
     if(icon_class) this.iconlib = new icon_class();
 
-
     this.root_container = this.theme.getContainer();
     this.layout_container = this.theme.getContainer();
-    
-    this.layout_builder = new JSONEditor.RootLayoutBuilder({
-        theme: this.theme,
-        layout_schema: this.layout_schema,
-        root_container: this.layout_container
-    });
-
-
-    if (this.layout_schema !== undefined) {
-        
-        this.root_container.appendChild(this.layout_container);
-    }
 
     this.element.appendChild(this.root_container);
     this.translate = this.options.translate || JSONEditor.defaults.translate;
@@ -282,9 +290,6 @@ JSONEditor.prototype = {
         required: true,
         container: self.root_container
       });
-      if (self.layout_builder.options.layout_schema) {
-          self.layout_builder.buildLayout();
-      }
 
       self.root.preBuild();
       self.root.build();
@@ -1444,10 +1449,16 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
             var fieldFound = false;
             if (group.Fields){
                 $each(group.Fields, function (i, field) {
-                    if (field.Path == editor.path) {
-                        fieldFound = true;
-                        foundGroup = group;
-                        return false;
+                    
+                    if (field.Path == editor.path 
+                    // in order to support relative path in layout
+                    || (editor.parent && editor.parent.path + '.' + field.Path == editor.path)) {
+                        if(!field.type || field.type == editor.original_schema.type){
+                            fieldFound = true;
+                            foundGroup = group;
+                            return false;
+                        }
+                        
                     }
                 });
                 if (fieldFound) {
@@ -1497,6 +1508,8 @@ JSONEditor.RootLayoutBuilder =JSONEditor.LayoutBuilder.AbstractLayoutBuilder.ext
         this._super(options);
     },   
     buildLayout: function () {
+        if(!this.options.layout_schema)
+            return;        
         var self = this;
         $each(this.options.layout_schema.layout, function (i, block) {
             var builder = new JSONEditor.LayoutBuilder.builders[block.type](self.options, block);
@@ -1617,7 +1630,24 @@ JSONEditor.LayoutBuilder.builders.tab = JSONEditor.LayoutBuilder.builders.group.
 JSONEditor.AbstractEditor = Class.extend({
   onChildEditorChange: function(editor) {
     this.onChange(true);
+  },  
+  // consider unregistering when destroying the editor
+  registerLayoutBuilder: function(builder){
+    this.layout_builder = builder;
   },
+  getGroupForEditor: function(editor, defaultBuilder){
+      var result = undefined; 
+      if(this.layout_builder)
+        result = this.layout_builder.getGroupForEditor(editor);
+      // 1. look in current builder
+      if(result)
+        return result;
+      // 2. try to look in parent builders  
+      if(this.parent){
+        result = this.parent.getGroupForEditor(editor);
+      }
+      return result;
+  },  
   notify: function() {
     this.jsoneditor.notifyWatchers(this.path);
   },
@@ -1643,7 +1673,6 @@ JSONEditor.AbstractEditor = Class.extend({
   },
   init: function(options) {
     this.jsoneditor = options.jsoneditor;
-    
     this.theme = this.jsoneditor.theme;
     this.template_engine = this.jsoneditor.template;
     this.iconlib = this.jsoneditor.iconlib;
@@ -1665,6 +1694,7 @@ JSONEditor.AbstractEditor = Class.extend({
     this.link_watchers = [];
     
     if(options.container) this.setContainer(options.container);
+    
   },
   setContainer: function(container) {
     this.container = container;
@@ -1674,7 +1704,7 @@ JSONEditor.AbstractEditor = Class.extend({
   },
   
   preBuild: function() {
-
+    
   },
   build: function() {
     
@@ -2752,7 +2782,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 }
             }
         }
-            // Normal layout
+        // Normal layout
         else {
             container = document.createElement('div');
             $each(this.property_order, function (i, key) {
@@ -2829,12 +2859,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             });
             this.no_link_holder = true;
         }
-            // If the object should be rendered as a table
+        // If the object should be rendered as a table
         else if (this.options.table) {
             // TODO: table display format
             throw "Not supported yet";
         }
-            // If the object should be rendered as a div
+        // If the object should be rendered as a div
         else {
             this.defaultProperties = this.schema.defaultProperties || Object.keys(this.schema.properties);
 
@@ -2883,27 +2913,32 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 }
             });
         }
-            // If the object should be rendered as a table
+        // If the object should be rendered as a table 
         else if (this.options.table) {
             // TODO: table display format
             throw "Not supported yet";
         }
-            // If the object should be rendered as a div
+        // If the object should be rendered as a div
         else {
-            var layoutSchemaIsUsed = this.jsoneditor.layout_schema !== undefined;
-            // add fake container in case we're in layout mode and this object
-            // is ignored
-            if(!this.container && layoutSchemaIsUsed) {
-                this.container = document.createElement("div");
-            }
             
+            this.layout_builder = new JSONEditor.RootLayoutBuilder({
+                theme: this.theme,
+                layout_schema: this.jsoneditor.getLayoutSchemaFor(this),
+                root_container: this.container
+            });
+
+            this.layout_builder.buildLayout();
+            this.registerLayoutBuilder(self.layout_builder)
+
             this.header = document.createElement('span');
             this.header.textContent = this.getTitle();
             this.title = this.theme.getHeader(this.header);
-            if (layoutSchemaIsUsed && this.container.firstChild) {
-                this.container.insertBefore(this.title, this.container.firstChild); 
-            } else {
-                this.container.appendChild(this.title);
+            if(!this.schema.hide_title) {
+                if (this.container.firstChild) {
+                    this.container.insertBefore(this.title, this.container.firstChild);
+                } else {
+                    this.container.appendChild(this.title);
+                }
             }
             this.container.style.position = 'relative';
 
@@ -2965,7 +3000,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.addproperty_holder.appendChild(this.addproperty_input);
             this.addproperty_holder.appendChild(this.addproperty_add);
             var spacer = document.createElement('div');
-            spacer.style.clear = 'both'; 
+            spacer.style.clear = 'both';
             this.addproperty_holder.appendChild(spacer);
 
 
@@ -2979,55 +3014,57 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.error_holder = document.createElement('div');
             this.container.appendChild(this.error_holder);
 
-            var group = self.jsoneditor.layout_builder.getGroupForEditor(self);
-            if (layoutSchemaIsUsed && group) {
+            var group = this.getGroupForEditor(self);
+            if (group) {
                 if (self.key == "root") {
                     this.layout_holder = this.jsoneditor.layout_container;
                     this.editor_holder = this.jsoneditor.layout_container;
                 } else {
-                        this.layout_holder = group.container.editor_holders;
-                        if (!this.layout_holder) {
-                            this.layout_holder = this.container;
-                        }
-                        this.editor_holder = this.theme.getIndentedPanel();
-                        this.row_container = this.theme.getGridContainer();
-                        this.editor_holder.appendChild(this.row_container);
-                        this.layout_holder.appendChild(this.editor_holder);                                                
+                    this.layout_holder = group.container.editor_holders;
+                    if (!this.layout_holder) {
+                        this.layout_holder = this.container;
+                    }
+                    this.editor_holder = this.theme.getIndentedPanel();
+                    this.row_container = this.theme.getGridContainer();
+                    this.editor_holder.appendChild(this.row_container);
+                    this.layout_holder.appendChild(this.editor_holder);
                 }
-            } else {
+            } else if(!this.layout_builder.options.layout_schema){
                 this.editor_holder = this.theme.getIndentedPanel();
                 // Container for child editor area
                 this.container.appendChild(this.editor_holder);
                 // Container for rows of child editors
                 this.row_container = this.theme.getGridContainer();
                 this.editor_holder.appendChild(this.row_container);
+            } else{
+                // do nothing so far? 
             }
-
+            
             $each(this.editors, function (key, editor) {
-                var group = self.jsoneditor.layout_builder.getGroupForEditor(editor);
-                if(layoutSchemaIsUsed && !group && editor.parent.key == "root"){
+                var group = self.getGroupForEditor(editor);
+                if (!group && editor.parent.key == "root") {
                     // do nothing so far
                 } else
-                if (layoutSchemaIsUsed && group && group.builder) {
-                    var editorHolder = group.builder.buildEditorHolder(editor);
-                    group.container.editor_holders.appendChild(editorHolder);
-                    editor.setContainer(editorHolder);
-                } else {
-                    var holder = self.theme.getGridColumn();
-                    // not sure that this is realy required 
-                    if (self.options.table_row) {
-                         holder = self.theme.getTableCell();
+                    if (group && group.builder) {
+                        var editorHolder = group.builder.buildEditorHolder(editor);
+                        group.container.editor_holders.appendChild(editorHolder);
+                        editor.setContainer(editorHolder);
+                    } else if(!self.layout_builder.options.layout_schema){
+                        var holder = self.theme.getGridColumn();
+                        // not sure that this is realy required 
+                        if (self.options.table_row) {
+                            holder = self.theme.getTableCell();
+                        }
+                        self.row_container.appendChild(holder);
+                        editor.setContainer(holder);
                     }
-                    self.row_container.appendChild(holder);
-                    editor.setContainer(holder);
-                }
                 
                 // add fake container in case we're in layout mode and this editor
                 // is ignored
-                if(!editor.container && layoutSchemaIsUsed) {
+                if (!editor.container) {
                     editor.container = document.createElement("div");
                 }
-                
+
                 editor.build();
                 editor.postBuild();
             });
@@ -3109,7 +3146,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 self.editor_holder.appendChild(self.editors[key].container);
             });
         }
-            // Layout object editors in grid if needed
+        // Layout object editors in grid if needed
         else {
             // Initial layout 
             this.layoutEditors();
@@ -3266,7 +3303,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             if (prebuild_only) return;
             this.editors[name].register();
         }
-            // New property
+        // New property
         else {
             if (!this.canHaveAdditionalProperties() && (!this.schema.properties || !this.schema.properties[name])) {
                 return;
@@ -3418,16 +3455,16 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.hideAddProperty();
             this.addproperty_controls.style.display = 'none';
         }
-            // If additional properties are disabled
+        // If additional properties are disabled
         else if (!this.canHaveAdditionalProperties()) {
             this.addproperty_add.style.display = 'none';
             this.addproperty_input.style.display = 'none';
         }
-            // If no new properties can be added
+        // If no new properties can be added
         else if (!can_add) {
             this.addproperty_add.disabled = true;
         }
-            // If new properties can be added
+        // If new properties can be added
         else {
             this.addproperty_add.disabled = false;
         }
@@ -3451,11 +3488,11 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                 self.addObjectProperty(i);
                 editor.setValue(value[i], initial);
             }
-                // Otherwise, remove value unless this is the initial set or it's required
+            // Otherwise, remove value unless this is the initial set or it's required
             else if (!initial && !self.isRequired(editor)) {
                 self.removeObjectProperty(i);
             }
-                // Otherwise, set the value to the default
+            // Otherwise, set the value to the default
             else {
                 editor.setValue(editor.getDefault(), initial);
             }
@@ -3497,7 +3534,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                     self.error_holder.appendChild(self.theme.getErrorMessage(error.message));
                 });
             }
-                // Hide error area
+            // Hide error area
             else {
                 this.error_holder.style.display = 'none';
             }
@@ -3637,7 +3674,7 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
         this.row_holder = document.createElement('div');
         this.panel.appendChild(this.row_holder);
     }
-
+        
     // Add controls
     this.addControls();
   },
@@ -4132,7 +4169,8 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
       e.preventDefault();
       e.stopPropagation();
       var i = self.rows.length;
-      if(self.row_cache[i]) {
+      // disable caching feature, since it does not work properly anyway
+      if(self.row_cache[i] && false) {
         self.rows[i] = self.row_cache[i];
         self.rows[i].setValue(self.rows[i].getDefault());
         self.rows[i].container.style.display = '';

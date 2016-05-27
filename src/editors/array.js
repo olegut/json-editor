@@ -115,7 +115,7 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
         this.row_holder = document.createElement('div');
         this.panel.appendChild(this.row_holder);
     }
-
+        
     // Add controls
     this.addControls();
   },
@@ -610,7 +610,8 @@ JSONEditor.defaults.editors.array = JSONEditor.AbstractEditor.extend({
       e.preventDefault();
       e.stopPropagation();
       var i = self.rows.length;
-      if(self.row_cache[i]) {
+      // disable caching feature, since it does not work properly anyway
+      if(self.row_cache[i] && false) {
         self.rows[i] = self.row_cache[i];
         self.rows[i].setValue(self.rows[i].getDefault());
         self.rows[i].container.style.display = '';

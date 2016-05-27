@@ -81,7 +81,7 @@
         
         .improp-root-element {
             width: 90%;
-            max-width: 800px;
+            max-width: 830px;
             min-width: 260px;
         }
         
@@ -99,7 +99,7 @@
         .improp-root-element label {
             float: left;
             clear: left;
-            min-width: 190px;
+            min-width: 150px;
             font-family: Tahoma, Arial, 'MS Sans Serif';
             font-size: 10.6667px;
             font-style: normal;
@@ -133,6 +133,21 @@
             font-variant: normal;
             font-weight: bold;
         }
+        
+        
+        #LeftMiddleGroup div h3,
+        #LeftBottomGroup div h3{
+            display: none;
+        }
+        
+        #LeftMiddleGroup ,
+        #LeftBottomGroup {
+            padding: 0px!important; 
+            margin: 0px!important;
+            border: 0px!important; 
+            border-radius: 0px!important;
+        }
+
     </style>
 
     <script>
@@ -289,331 +304,453 @@
     JSONEditor.defaults.options.disable_edit_json = true;
     JSONEditor.defaults.options.disable_properties = true;
     JSONEditor.defaults.options.disable_collapse = true;
+    // JSONEditor.defaults.options.no_additional_properties = true;
+    
     if(!layout_schema){
         layout_schema = {
-                "groups": [
-                  {
-                      "Id": "LeftTopGroup",                              
-                      "Fields": [
-                        {
-                            "Path": "root.location.location_nested"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_name"
-                        },
-                        {
-                            "Path": "root.im_cat_id"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_registered_no"
-                        },                        
-                        {
-                            "Path": "root.master_prop_fund.mpf_risk_id"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_dd_id"
-                        }
-                      ]
-                  },
-                  {
-                      "Id": "LeftMiddleGroup",
-                      "Fields": [
-                        {
-                            "Path": "root.master_prop_fund.mpf_reg_address"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_reg_city"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_reg_state"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_reg_postcode"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_reg_country"
-                        }
-                      ]
-                  },
-                  {
-                      "Id": "LeftBottomGroup",
-                      "Fields": [
-                        {
-                            "Path": "root.master_prop_fund.mpf_biz_address"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_biz_city"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_biz_state"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_biz_postcode"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_biz_country"
-                        }
-                      ]
-                  },
-                  {
-                      "Id": "RightTopGroup",
-                      "Fields": [
-                        {
-                            "Path": "root.location"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_directors"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_isopen"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_open_date"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.mpf_close_date"
-                        },
-                        {
-                            "Path": "root.master_prop_fund.regulatory_body_id"
-                        },
-                        {
-                            "Path": "root.im_prop_assets"
-                        },
-                        {
-                            "Path": "root.im_prop_regulator_no"
-                        }
-                      ]
-                  },
-                  {
-                      "Id": "RightBottomGroup",
-                      "Fields": [
-                        {
-                            "Path": "root.im_prop_oasys.im_oasys_account"
-                        },
-                        {
-                            "Path": "root.im_prop_oasys.im_oasys_block"
-                        },
-                        {
-                            "Path": "root.im_prop_oasys.im_oasys_gacronym"
-                        },
-                        {
-                            "Path": "root.im_prop_oasys.im_oasys_dacronym"
-                        },
-                        {
-                            "Path": "root._im_cc_bda"
-                        },
-                        {
-                            "Path": "root._im_cc_usa"
-                        }
-                      ]
-                  },
-                  {
-                      "Id": "Tab1Group",
-                      "Fields": [
+                layout: [
+                    // {
+                    //     layoutFor: "root.Value.Oasys",
+                    //     "groups":[
+                    //         {
+                    //             "Id": "LeftTab",
+                    //             "Fields": [
+                    //                 {
+                    //                     "Path": "root.Value.Oasys.Account",
+                    //                 },
+                    //                 {
+                    //                     "Path": "root.Value.Oasys.Block",
+                    //                 }                                    
+                    //             ]
+                    //         },
+                    //         {
+                    //             "Id": "RightTab",
+                    //             "Fields": [
+                    //                 {
+                    //                     "Path": "root.Value.Oasys.Gacronym",
+                    //                 },
+                    //                 {
+                    //                     "Path": "root.Value.Oasys.Dacronym",
+                    //                 }                                    
+                    //             ]
+                    //         }
+                    //     ],                        
+                    //     "layout":[
+                    //         {
+                    //                 type: "tab_container",
+                    //                 cssClass: "vertical-tab-container",
+                    //                 "childBlocks": [
+                    //                     {
+                    //                         type: "tab",
+                    //                         title: "Left Tab",
+                    //                         "RefId": "LeftTab"
+                    //                     },
+                    //                     {
+                    //                         type: "tab",
+                    //                         title: "Right Tab",
+                    //                         "RefId": "RightTab"
+                    //                     }                                
+                    //                 ]                            
+                    //             }
+                    //     ]
+                    // },
+                    {
+                        layoutFor: "root.Value.Peoples25",
+                        "groups":[
                             {
-                                "Path": "root.documents"
-                            }
-                      ]
-                  },
-                  {
-                      "Id": "Tab2Group",
-                      "Fields": [
+                                "Id": "LeftTab",
+                                "Fields": [
+                                    {
+                                        "Path": "Firstname",
+                                    },
+                                    {
+                                        "Path": "Surname",
+                                    },
+                                    {
+                                        "Path": "Dob",
+                                    }                                      
+                                ]
+                            },
                             {
-                                "Path": "root.notes"
+                                "Id": "RightTab",
+                                "Fields": [
+                                    {
+                                        "Path": "City",
+                                    },
+                                    {
+                                        "Path": "State",
+                                    },
+                                    {
+                                        "Path": "PostCode",
+                                    },
+                                    {
+                                        "Path": "Country",
+                                    },
+                                    {
+                                        "Path": "Address",
+                                        "type": "string"
+                                    }                                  
+                                ]
                             }
-                      ]
-                  },
-                  {
-                      "Id": "Tab3Group",
-                      "Fields": [
+                        ],
+                        // "layout":[
+                        //     {
+                        //             type: "container",
+                        //             "childBlocks": [
+                        //                 {
+                        //                     type: "group",
+                        //                     "attributes": [
+                        //                         {
+                        //                             "name": "style",
+                        //                             "value": "width: 350px; display: inline-block; vertical-align: top;"
+                        //                         }
+                        //                     ],
+                        //                     title: "Full name",
+                        //                     "RefId": "LeftTab"
+                        //                 },
+                        //                 {
+                        //                     type: "group",
+                        //                     "attributes": [
+                        //                         {
+                        //                             "name": "style",
+                        //                             "value": "width: 350px; display: inline-block;"
+                        //                         }
+                        //                     ],
+                        //                     title: "Address",
+                        //                     "RefId": "RightTab"
+                        //                 }                                
+                        //             ]                            
+                        //         }
+                        // ]                        
+                        "layout":[
                             {
-                                "Path": "root.mpf_people25"
-                            }
-                      ]
-                  },
-                  {
-                      "Id": "Tab4Group",
-                      "Fields": [
-                            {
-                                "Path": "root.mpf_companies25"
-                            }
-                      ]
-                  },
-                  {
-                      "Id": "RelatedImPropsTabGroup",                      
-                      "Fields": [
-                            {
-                                "Path": "root.imPropGroup.relatedImProps"
-                            }
-                      ]
-                  }                                                                                                 
-                ],
-                "layout": [
-                  {
-                      type: "container",
-                      cssClass: "improp-root-element",                      
-                    //   "attributes": [
-                    //     {
-                    //         "name": "class",
-                    //         "value": "improp-root-element"
-                    //     }
-                    //   ],
-                       "childBlocks": [
-                    //     {
-                    //         type: "group",
-                    //         "cssClass": [
-                    //             "related-im-props-container",
-                    //             "vertical-tab-container",
-                    //         ],
-                    //         "RefId": "RelatedImPropsTabGroup"
-                    //     },
-                    //     {
-                    //         type: "separator"
-                    //     },
-                        {
-                            type: "container",
-                            "attributes": [
-                                {
-                                    "name": "style",
-                                    "value": "float: left;"
+                                    type: "tab_container",
+                                    cssClass: "vertical-tab-container",
+                                    "childBlocks": [
+                                        {
+                                            type: "tab",
+                                            title: "Full name",
+                                            "RefId": "LeftTab"
+                                        },
+                                        {
+                                            type: "tab",
+                                            title: "Address",
+                                            "RefId": "RightTab"
+                                        }                                
+                                    ]                            
                                 }
-                            ],
-                            "childBlocks": [                                
+                        ]
+                    },
+                    {
+                        layoutFor: "root",
+                        "groups": [
+                        {
+                            "Id": "LeftTopGroup",                              
+                            "Fields": [
                                 {
-                                    type: "group",
-                                    "RefId": "LeftTopGroup"
+                                    "Path": "root.Value.Name"
                                 },
                                 {
-                                    type: "separator"
+                                    "Path": "root.Value.Category"
                                 },
                                 {
-                                    type: "group",
-                                    title: "Registered Address:",
-                                    "RefId": "LeftMiddleGroup"
+                                    "Path": "root.Value.Risk"
                                 },
                                 {
-                                    type: "separator"
-                                },
-                                {
-                                    type: "group",
-                                    title: "Business Address:",
-                                    "RefId": "LeftBottomGroup"
+                                    "Path": "root.Value.MpfDueDiligence"
                                 }
                             ]
                         },
                         {
-                            type: "container",
-                            "attributes": [
+                            "Id": "LeftMiddleGroup",
+                            "Fields": [
                                 {
-                                    "name": "style",
-                                    "value": "float: left;"
-                                }
-                            ],
-                            "childBlocks": [
-                                {
-                                    type: "group",
-                                    "RefId": "RightTopGroup"
-                                },
-                                {
-                                    type: "separator"
-                                },
-                                {
-                                    type: "group",
-                                    title: "Oasys Global Details",
-                                    "RefId": "RightBottomGroup"
+                                    "Path": "root.Value.BusinessAddress"
                                 }
                             ]
                         },
                         {
-                            type: "separator"
+                            "Id": "LeftBottomGroup",
+                            "Fields": [
+                                {
+                                    "Path": "root.Value.RegisteredAddress"
+                                }
+                            ]
                         },
                         {
-                            type: "tab_container",
-                            cssClass: "vertical-tab-container",
+                            "Id": "RightTopGroup",
+                            "Fields": [
+                                {
+                                    "Path": "root.Value.RegisteredNo"
+                                },                        
+                                {
+                                    "Path": "root.Value.Directors"
+                                },
+                                {
+                                    "Path": "root.Value.IsOpen"
+                                },
+                                {
+                                    "Path": "root.Value.OpenDate"
+                                },
+                                {
+                                    "Path": "root.Value.CloseDate"
+                                },
+                                {
+                                    "Path": "root.Value.RegulatoryBody"
+                                },
+                                {
+                                    "Path": "root.Value.Assets"
+                                },
+                                {
+                                    "Path": "root.Value.RegulatorNo"
+                                }
+                            ]
+                        },
+                        {
+                            "Id": "RightBottomGroup",
+                            "Fields": [
+                                {
+                                    "Path": "root.Value.Oasys"
+                                },
+                                {
+                                    "Path": "root.Value.CC_BDA"
+                                },
+                                {
+                                    "Path": "root.Value.CC_USA"
+                                }
+                            ]
+                        },                  
+                        {
+                            "Id": "Tab0Group",
+                            "Fields": [
+                                    {
+                                        "Path": "root.Value.Funds"
+                                    }
+                            ]
+                        },
+                        {
+                            "Id": "Tab1Group",
+                            "Fields": [
+                                    {
+                                        "Path": "root.Value.Documents"
+                                    }
+                            ]
+                        },
+                        {
+                            "Id": "Tab2Group",
+                            "Fields": [
+                                    {
+                                        "Path": "root.Value.Notes"
+                                    }
+                            ]
+                        },
+                        {
+                            "Id": "Tab3Group",
+                            "Fields": [
+                                    {
+                                        "Path": "root.Value.Peoples25"
+                                    }
+                            ]
+                        },
+                        {
+                            "Id": "Tab4Group",
+                            "Fields": [
+                                    {
+                                        "Path": "root.Value.Companies25"
+                                    }
+                            ]
+                        },
+                        {
+                            "Id": "RelatedImPropsTabGroup",                      
+                            "Fields": [
+                                    {
+                                        "Path": "root.Value.imPropGroup.relatedImProps"
+                                    }
+                            ]
+                        }                                                                                                 
+                        ],
+                        "layout": [
+                        {
+                            type: "container",
+                            cssClass: "improp-root-element",                      
+                            //   "attributes": [
+                            //     {
+                            //         "name": "class",
+                            //         "value": "improp-root-element"
+                            //     }
+                            //   ],
                             "childBlocks": [
+                            //     {
+                            //         type: "group",
+                            //         "cssClass": [
+                            //             "related-im-props-container",
+                            //             "vertical-tab-container",
+                            //         ],
+                            //         "RefId": "RelatedImPropsTabGroup"
+                            //     },
+                            //     {
+                            //         type: "separator"
+                            //     },
                                 {
-                                    type: "tab",
-                                    title: "Documents",                                    
-                                    "RefId": "Tab1Group"
-                                },
-                                {
-                                    type: "tab",
-                                    title: "Notes",
-                                    "RefId": "Tab2Group"
-                                },
-                                {
-                                    type: "tab",
-                                    title: "Control over 25% (People)",
-                                    "RefId": "Tab3Group"
-                                },
-                                {
-                                    type: "tab",
-                                    title: "Control over 25% (Companies)",
-                                    "RefId": "Tab4Group"
-                                },
-                                {
-                                    type: "tab",
-                                    title: "Related IM Props",
-                                    "cssClass": [
-                                        "related-im-props-container"
+                                    type: "container",
+                                    "attributes": [
+                                        {
+                                            "name": "style",
+                                            "value": "float: left;"
+                                        }
                                     ],
-                                    "RefId": "RelatedImPropsTabGroup"
-                                }                                
-                            ]                            
+                                    "childBlocks": [                                
+                                        {
+                                            type: "group",
+                                            "RefId": "LeftTopGroup"
+                                        },
+                                        {
+                                            type: "separator"
+                                        },
+                                        {
+                                            type: "group",
+                                            title: "Registered Address:",
+                                            "RefId": "LeftMiddleGroup"
+                                        },
+                                        {
+                                            type: "separator"
+                                        },
+                                        {
+                                            type: "group",
+                                            title: "Business Address:",
+                                            "RefId": "LeftBottomGroup"
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: "container",
+                                    "attributes": [
+                                        {
+                                            "name": "style",
+                                            "value": "float: left;"
+                                        }
+                                    ],
+                                    "childBlocks": [
+                                        {
+                                            type: "group",
+                                            "RefId": "RightTopGroup"
+                                        },
+                                        {
+                                            type: "separator"
+                                        },
+                                        {
+                                            type: "group",
+                                            title: "Oasys Global Details",
+                                            "RefId": "RightBottomGroup"
+                                        }
+                                    ]
+                                },
+                                {
+                                    type: "separator"
+                                },
+                                {
+                                    type: "tab_container",
+                                    cssClass: "vertical-tab-container",
+                                    "childBlocks": [
+                                        {
+                                            type: "tab",
+                                            title: "Funds",        
+                                            "cssClass": [
+                                                "related-im-props-container"
+                                            ],                            
+                                            "RefId": "Tab0Group"
+                                        },
+                                        {
+                                            type: "tab",
+                                            title: "Documents",                                    
+                                            "RefId": "Tab1Group"
+                                        },
+                                        {
+                                            type: "tab",
+                                            title: "Notes",
+                                            "RefId": "Tab2Group"
+                                        },
+                                        {
+                                            type: "tab",
+                                            title: "Control over 25% (People)",
+                                            "RefId": "Tab3Group"
+                                        },
+                                        {
+                                            type: "tab",
+                                            title: "Control over 25% (Companies)",
+                                            "RefId": "Tab4Group"
+                                        },
+                                        {
+                                            type: "tab",
+                                            title: "Related IM Props",
+                                            "cssClass": [
+                                                "related-im-props-container"
+                                            ],
+                                            "RefId": "RelatedImPropsTabGroup"
+                                        }                                
+                                    ]                            
+                                }
+                            ]
                         }
-                      ]
-                  }
-                ]
+                        ]
+                    }
+                ]                
             };
     }
     // Default starting schema
     if(!schema) {
         schema = {
-                     $ref: "#/definitions/im_prop"
-                ,
+                type: "object",
+                title: "IM PROP", 
+                    properties: {    
+                        Value:{
+                            $ref: "#/definitions/CounterPartySchema"
+                        }
+                },
                 definitions: {
-                    im_prop: {
-                        title: "IM PROP", 
+                    CounterPartySchema: {                        
                         type: "object",
-                        properties: {     
+                        properties: {      
                             imPropGroup:{                                    
-                                $ref: "#/definitions/imPropGroup"
+                                $ref: "#/definitions/imPropGroupSchema"
                             },                                                                            
-                            mpf_companies25: {
+                            Companies25: {
                                 "type": "array",     
                                 title: "Control over 25% (Companies)",                   
                                 "uniqueItems": true,
                                 "items": {
-                                    $ref: "#/definitions/master_prop_fund"
+                                    $ref: "#/definitions/MasterPropFundSchema"
                                 }
                             },
-                            mpf_people25: {
+                            Peoples25: {
                                 "type": "array",     
                                 title: "Control over 25% (People)",                   
                                 "uniqueItems": true,
                                 "items": {
-                                    $ref: "#/definitions/mpf_people25"
+                                    $ref: "#/definitions/People25Schema"
                                 }
                             },
-                            "documents": {
+                            "Documents": {
                                 type: "array",
-                                //format: "table",
-                                title: "Documents",
+                                title: "Documents",                                
                                 uniqueItems: true,
                                 items: {
-                                    $ref: "#/definitions/document"                            
+                                    $ref: "#/definitions/DocumentSchema",
+                                    headerTemplate: "{{self.Title}}"                            
                                 }
                             },
-                            "notes": {
+                            "Funds": {                                
+                                $ref: "#/definitions/LinkToFundSchema"                                                                                          
+                            },                            
+                            "Notes": {
                                 type: "array",
-                                // format: "table",
                                 title: "Notes",
                                 uniqueItems: true,
                                 items: {
-                                    $ref: "#/definitions/note"       
+                                    $ref: "#/definitions/NoteSchema"       
                                 }
                             },                                        
-                            "im_cat_id": {
+                            "Category": {
                                 type: "string",
                                 title: "Category",
                                 "enum": [
@@ -630,7 +767,7 @@
                                 ],
                                 "default": "undefined"
                             },                                        
-                            "im_prop_assets": {
+                            "Asset": {
                                 type: "string",
                                 title: "Assets Under Management",
                                 "enum": [
@@ -641,118 +778,111 @@
                                 ],
                                 "default": "undefined"
                             },
-                            "im_prop_regulator_no": {
+                            "RegulatorNo": {
                                 type: "integer",
                                 title: "Regulator number",
                                 minimum: 10000,
                                 maximum: 99999999
                             },                    
-                            "_im_cc_bda": {
+                            "CC_BDA": {
                                 type: "boolean",
                                 format: "checkbox",
                                 title: "CC BDA"
                             },
-                            "_im_cc_usa": {
+                            "CC_USA": {
                                 type: "boolean",
                                 format: "checkbox",
                                 title: "CC USA"
                             },
-                            master_prop_fund: {
-                                $ref: "#/definitions/master_prop_fund",
-                                title: "Company 25"
-                            },
-                            im_prop_oasys: {
-                                $ref: "#/definitions/im_prop_oasys"
+                            Oasys: {
+                                hide_title: true,
+                                $ref: "#/definitions/OasysSchema"
                             }   
-                        }
+                        },
+                        $ref: "#/definitions/MasterPropFundSchema"
                     },
-                    imPropGroup:{
-                                "type": "object",
-                                "properties": {
-                                // relatedImProps: {
-                                //     "type": "array",   
-                                //     "format": "tabs",
-                                //     title: "Related IM Props",                       
-                                //     "items": {
-                                //         headerTemplate:"{{self.name}}",     
-                                //         "type": "object",
-                                //         "properties": {
-                                //             "name": {
-                                //                 "type": "string"
-                                //             }
-                                //         }
-                                //     }
-                                // },                                    
-                                    "relatedImProps": {
-                                        "type": "array",   
-                                        title: "Related IM Props",                       
-                                        "items": {     
-                                            "type": "object", 
-                                            "id": "related_im_prop_item",                                   
-                                            "properties": {
-                                                "name": {
-                                                    "type": "string",
-                                                    "watch": {
-                                                        "link_id": "related_im_prop_item.id",
-                                                        "link_title": "related_im_prop_item.name",
-                                                    },
-                                                    "links": [
-                                                        {
-                                                            "href": "/test/path/{{link_id}}",
-                                                            "rel": "{{link_title}}"                     
-                                                        }
-                                                    ]
-                                                },
-                                                "id": {
-                                                    "type": "string"
+                    imPropGroupSchema:{
+                        "type": "object",
+                        "properties": {                                    
+                            "relatedImProps": {
+                                "type": "array",   
+                                title: "Related IM Props",                       
+                                "items": {     
+                                    "type": "object", 
+                                    "id": "related_im_prop_item",                                   
+                                    "properties": {
+                                        "Name": {
+                                            "type": "string",
+                                            "watch": {
+                                                "link_id": "related_im_prop_item.Id",
+                                                "link_title": "related_im_prop_item.Name",
+                                            },
+                                            "links": [
+                                                {
+                                                    "href": "/test/path/{{link_id}}",
+                                                    "rel": "{{link_title}}"                     
                                                 }
-                                            }
+                                            ]
+                                        },
+                                        "Id": {
+                                            "type": "string"
                                         }
-                                    },
-                                }    
+                                    }
+                                }
                             },
+                        }    
+                    },
+                    LinkToFundSchema:{                                  
+                        "type": "array",   
+                        title: "Funds",                       
+                        "items": {     
+                            "type": "object", 
+                            "id": "linkToFund",                                   
+                            "properties": {
+                                "Name": {
+                                    "type": "string",
+                                    "watch": {
+                                        "link_id": "linkToFund._id",
+                                        "link_title": "linkToFund.Name",
+                                    },
+                                    "links": [
+                                        {
+                                            "href": "/path/to/fund/{{link_id}}",
+                                            "rel": "{{link_title}}"                     
+                                        }
+                                    ]
+                                },
+                                "_id": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },                    
                     // IS NOT USED IN THIS SCHEME, but is used for fund_administrator
-                    fund_administrator: {
+                    FundAdministratorSchema: {
                         "type": "object",
                         "properties": {
-                            "fund_admin_firstname": {
+                            "Firstname": {
                                 type: "string",
                                 title: "Name "
                             },   
-                            "fund_admin_surname": {
+                            "Surname": {
                                 type: "string",
                                 title: "Surname"
                             },
-                            "fund_admin_address": {
-                                type: "string",
-                                title: "Address"
-                            },
-                            "fund_admin_city": {
-                                type: "string",
-                                title: "City"
-                            },                         
-                            "fund_admin_state": {
-                                type: "string",
-                                title: "State"
-                            },
-                            "fund_admin_postcode": {
-                                type: "string",
-                                title: "Post Code/ZIP"
-                            },
-                            "fund_admin_country": {
-                                type: "string",
-                                title: "Country"
-                            }
+                            "Address": {
+                                $ref: "#/definitions/AddressSchema",
+                            }                            
                         }
                     },
-                    im_prop_oasys: {
+                    OasysSchema: {
                         "type": "object",
                         "properties": {
-                            "im_oasys_account": {
+                            "Account": {
                                 type: "string",
                                 title: "Account"
                             },
-                            "im_oasys_block": {
+                            "Block": {
                                 type: "string",
                                 title: "Oasis block?",
                                 "enum": [
@@ -761,25 +891,51 @@
                                 ],
                                 "default": "undefined"
                             },
-                            "im_oasys_gacronym": {
+                            "Gacronym": {
                                 type: "string",
                                 title: "Global Acronym"
                             },
-                            "im_oasys_dacronym": {
+                            "Dacronym": {
                                 type: "string",
                                 title: "Domestic Acronym"
                             }
                         }
                     },
-                    master_prop_fund: {
+                    AddressSchema: {
+                        "type": "object",
+                        "title": "",                        
+                        "properties": {
+                            "Address": {
+                                type: "string",
+                                title: "Address"
+                            },
+                            "City": {
+                                type: "string",
+                                title: "City"
+                            },
+                            "State": {
+                                type: "string",
+                                title: "State"
+                            },
+                            "PostCode": {
+                                type: "string",
+                                title: "Post Code/ZIP"
+                            },
+                            "Country": {
+                                type: "string",
+                                title: "Country"
+                            },
+                        }
+                    },
+                    MasterPropFundSchema: {
                         "type": "object",
                         "title": "Master Fund",
                         "properties": {
-                            "mpf_name": {
+                            "Name": {
                                 type: "string",
                                 title: "IM PROP Name"
                             },
-                            "mpf_risk_id": {
+                            "Risk": {
                                 type: "string",
                                 title: "Risk",
                                 "enum": [
@@ -789,136 +945,102 @@
                                 ],
                                 "default": "undefined"
                             },
-                            "mpf_dd_id": {
+                            "MpfDueDiligence": {
                                 type: "string",
                                 title: "Due Diligence",
                                 "enum": [
-                                    "Simplified due diligence",
-                                    "Customer due diligence",
-                                    "Enhanced due diligence"
+                                    "SDD|Simplified due diligence",
+                                    "CDD|Customer due diligence",
+                                    "EDD|Enhanced due diligence"
                                 ],
                                 "default": "undefined"
+                            },        
+                            RegisteredAddress: {
+                                type: "object",
+                                title: "Registered Address",
+                                $ref: "#/definitions/AddressSchema"
                             },
-        
-                            /* Registered Address:*/
-                            "mpf_reg_address": {
-                                type: "string",
-                                title: "Address"
-                            },
-                            "mpf_reg_city": {
-                                type: "string",
-                                title: "City"
-                            },
-                            "mpf_reg_state": {
-                                type: "string",
-                                title: "State"
-                            },
-                            "mpf_reg_postcode": {
-                                type: "string",
-                                title: "Post Code/ZIP"
-                            },
-                            "mpf_reg_country": {
-                                type: "string",
-                                title: "Country"
-                            },
-        
-                            /* Business Address: */
-                            "mpf_biz_address": {
-                                type: "string",
-                                title: "Address"
-                            },
-                            "mpf_biz_city": {
-                                type: "string",
-                                title: "City"
-                            },
-                            "mpf_biz_state": {
-                                type: "string",
-                                title: "State"
-                            },
-                            "mpf_biz_postcode": {
-                                type: "string",
-                                title: "Post Code/ZIP"
-                            },
-                            "mpf_biz_country": {
-                                type: "string",
-                                title: "Country"
-                            },
-                            "mpf_registered_no": {
+                            BusinessAddress: {
+                                type: "object",
+                                title: "Business Address",
+                                $ref: "#/definitions/AddressSchema"
+                            },                            
+                            "RegisteredNo": {
                                 type: "string",
                                 title: "Registered number"
                             },
-                            "regulatory_body_id": {
+                            "RegulatoryBody": {
                                 type: "string",
                                 format: "autocomplete",
                                 title: "Regulatory Body",
                                 options: {
                                         choises: [
-                                            "USAPATRIOT ACT|USAPATRIOT ACT",
-                                            "TWSE|Taiwan Stock Exchange Corp",
-                                            "SICCFIN|SERVICE D'INFORMATION ET DE CONTROLE SUR LES CIRCUITES FINANCIERS",
-                                            "SFC|Securities and Futures Commission",
-                                            "SECOM MALAYSIA|Securities Commission Malaysia",
-                                            "SEC|SECURITIES AND EXCHANGE COMMISSION",
-                                            "SCB|The Securities Commission of The Bahamas",
-                                            "SAAM|SWISS ASSOCIATION OF ASSET MANAGERS",
-                                            "PHLX|Philadelphia Stock Exchange",
-                                            "PFTS|PFTS Stock Exchange, Ukraine",
-                                            "OSFI|Office of the Superintendent of Financial Institutions Canada",
-                                            "OSFI|Office of the Superintendent of Financial Institutions Canada",
-                                            "OSC|ONTARIO SECURITIES COMMISION",
-                                            "OARG|ORGANISME D'AUTOREGULATION",
-                                            "NZFSP|New Zealand Financial Services Provider Register",
-                                            "NFA|NATIONAL FUTURES ASSOCIATION",
-                                            "MFSA|Malta Financial Services Authority",
-                                            "MAS|MONETARY AUTHORITY OF SINGAPORE",
-                                            "LISTED|Listed on regulated exchange",
-                                            "JFSC|Jersey Financial Services Commission",
-                                            "IOM FSC|Isle of Man Financial Supervision Commission",
-                                            "INAF|Institut Nacional Andorra De Finances",
-                                            "IFS|IRISH FINANCIAL SERVICES REGULATOR",
-                                            "HCMC|Hellenic Capital Market Commission",
-                                            "GOVERNMENT|GOVT PENSION FUND",
-                                            "GFSC|Guernsey Financial Services Commission",
-                                            "Finansinspektionen|Swedish Financial Supervisory Authority",
-                                            "Financial Supervisory Service of Korea|Financial Supervisory Service of Korea",
-                                            "FSS Korea|Financial Supervisory Service of Korea",
-                                            "FSCM|Financial Services Commission of Mauritius",
-                                            "FSCB|Financial Supervision Commission of Bulgaria",
-                                            "FSC|Financial Services Commission of Gibraltar",
-                                            "FSB|Financial Services Board South Africa",
-                                            "FSAN|The Financial Supervisory Authority of Norway",
-                                            "FSAJP|Financial Services Agency Japan",
-                                            "FMSA|Financial Market Stabilisation Agency",
-                                            "FMA|Financial Market Authority Liechtenstein",
-                                            "FINRA|FINANCIAL INDUSTRY REGULATORY AUTHORITY",
-                                            "FINMA|Swiss Financial Market Supervisory Authority",
-                                            "FCA|FINANCIAL CONDUCT AUTHORITY",
-                                            "Danish FSA|Finanstilsynet",
-                                            "CSSF|Commission de Surveillance du Secteur Financier - Luxembourg",
-                                            "CSEC|Cyprus Securities and Exchange Commission",
-                                            "CSA|Canadian Securities Administrators",
-                                            "CNMV|Comisión Nacional del Mercado de Valores",
-                                            "CIMA|Cayman Islands Monetary Authority",
-                                            "CCAF|Commission de Controle des Activities Financiers",
-                                            "CBOE|CHICAGO BOARD OPTIONS EXCHANGE",
-                                            "CBIE|Central Bank of Ireland",
-                                            "BVIFSC|British Virgin Islands Financial Services Commission",
-                                            "BOS|BANK OF SLOVENIA",
-                                            "BMA|Bermuda Monetary Authority",
-                                            "BI|BANK D\'ITALIA",
-                                            "BF|Banque de France",
-                                            "BDP|Banco De Portugal",
-                                            "BDE|Banco De Espana",
-                                            "BAFIN|German Federal Financial Supervisory Authority",
-                                            "ATVP|Securities Market Agency Slovenia",
-                                            "ATVP|Securities Market Agency Slovenia",
-                                            "ASIC|AUSTRALIAN SECURITIES & INVESTMENTS COMMISSION",
-                                            "AMF|AUTORITE DES MARCHES FINANCIERS",
-                                            "AFM|Netherlands Authority For the Financial Markets"
+                                            "USAPATRIOT ACT | USAPATRIOT ACT",
+                                            "TWSE | Taiwan Stock Exchange Corp",
+                                            "SICCFIN | SERVICE D'INFORMATION ET DE CONTROLE SUR LES CIRCUITES FINANCIERS",
+                                            "SFC | Securities and Futures Commission",
+                                            "SECOM MALAYSIA | Securities Commission Malaysia",
+                                            "SEC | SECURITIES AND EXCHANGE COMMISSION",
+                                            "SCB | The Securities Commission of The Bahamas",
+                                            "SAAM | SWISS ASSOCIATION OF ASSET MANAGERS",
+                                            "PHLX | Philadelphia Stock Exchange",
+                                            "PFTS | PFTS Stock Exchange, Ukraine",
+                                            "OSFI | Office of the Superintendent of Financial Institutions Canada",
+                                            "OSFI | Office of the Superintendent of Financial Institutions Canada",
+                                            "OSC | ONTARIO SECURITIES COMMISION",
+                                            "OARG | ORGANISME D'AUTOREGULATION",
+                                            "NZFSP | New Zealand Financial Services Provider Register",
+                                            "NFA | NATIONAL FUTURES ASSOCIATION",
+                                            "MFSA | Malta Financial Services Authority",
+                                            "MAS | MONETARY AUTHORITY OF SINGAPORE",
+                                            "LISTED | Listed on regulated exchange",
+                                            "JFSC | Jersey Financial Services Commission",
+                                            "IOM FSC | Isle of Man Financial Supervision Commission",
+                                            "INAF | Institut Nacional Andorra De Finances",
+                                            "IFS | IRISH FINANCIAL SERVICES REGULATOR",
+                                            "HCMC | Hellenic Capital Market Commission",
+                                            "GOVERNMENT | GOVT PENSION FUND",
+                                            "GFSC | Guernsey Financial Services Commission",
+                                            "Finansinspektionen | Swedish Financial Supervisory Authority",
+                                            "Financial Supervisory Service of Korea | Financial Supervisory Service of Korea",
+                                            "FSS Korea | Financial Supervisory Service of Korea",
+                                            "FSCM | Financial Services Commission of Mauritius",
+                                            "FSCB | Financial Supervision Commission of Bulgaria",
+                                            "FSC | Financial Services Commission of Gibraltar",
+                                            "FSB | Financial Services Board South Africa",
+                                            "FSAN | The Financial Supervisory Authority of Norway",
+                                            "FSAJP | Financial Services Agency Japan",
+                                            "FMSA | Financial Market Stabilisation Agency",
+                                            "FMA | Financial Market Authority Liechtenstein",
+                                            "FINRA | FINANCIAL INDUSTRY REGULATORY AUTHORITY",
+                                            "FINMA | Swiss Financial Market Supervisory Authority",
+                                            "FCA | FINANCIAL CONDUCT AUTHORITY",
+                                            "Danish FSA | Finanstilsynet",
+                                            "CSSF | Commission de Surveillance du Secteur Financier - Luxembourg",
+                                            "CSEC | Cyprus Securities and Exchange Commission",
+                                            "CSA | Canadian Securities Administrators",
+                                            "CNMV | Comisión Nacional del Mercado de Valores",
+                                            "CIMA | Cayman Islands Monetary Authority",
+                                            "CCAF | Commission de Controle des Activities Financiers",
+                                            "CBOE | CHICAGO BOARD OPTIONS EXCHANGE",
+                                            "CBIE | Central Bank of Ireland",
+                                            "BVIFSC | British Virgin Islands Financial Services Commission",
+                                            "BOS | BANK OF SLOVENIA",
+                                            "BMA | Bermuda Monetary Authority",
+                                            "BI | BANK D\'ITALIA",
+                                            "BF | Banque de France",
+                                            "BDP | Banco De Portugal",
+                                            "BDE | Banco De Espana",
+                                            "BAFIN | German Federal Financial Supervisory Authority",
+                                            "ATVP | Securities Market Agency Slovenia",
+                                            "ATVP | Securities Market Agency Slovenia",
+                                            "ASIC | AUSTRALIAN SECURITIES & INVESTMENTS COMMISSION",
+                                            "AMF | AUTORITE DES MARCHES FINANCIERS",
+                                            "AFM | Netherlands Authority For the Financial Markets"
                                         ]
                                 }
                             },
-                            "mpf_directors": {
+                            "Directors": {
                                 type: "string",
                                 title: "Directors",
                                 format: "textarea",
@@ -926,75 +1048,55 @@
                                     "input_height": "50px"
                                 }
                             },
-                            "mpf_isopen": {
+                            "IsOpen": {
                                 type: "boolean",
                                 format: "checkbox",
                                 title: "Is Open?"
                             },
-                            "mpf_open_date": {
+                            "OpenDate": {
                                 type: "string",
                                 format: "date",
                                 title: "Open date:"
                             },
-                            "mpf_close_date": {
+                            "CloseDate": {
                                 type: "string",
                                 format: "date",
                                 title: "Close date:"
                             }                            
                         },
                     },
-                    mpf_people25: {
+                    People25Schema: {
                         "type": "object",
                         "title": "People 25",
                         "properties": {
-                            "mpf_people25_firstname": {
+                            "Firstname": {
                                 "title": "Firstname",
                                 "type": "string" 
                             },
-                            "mpf_people25_surname": {
+                            "Surname": {
                                 "title": "Surname",
                                 "type": "string" 
                             },
-                            "mpf_people25_dob": {
+                            "Dob": {
                                 "title": "DOB",
                                 "type": "string",
                                 format: "date"
                             },
-                            "mpf_people25_address": {
-                                "title": "Address",
-                                "type": "string" 
-                            },
-                            "mpf_people25_city": {
-                                "title": "City",
-                                "type": "string" 
-                            },
-                            "mpf_people25_state": {
-                                "title": "State",
-                                "type": "string" 
-                            },
-                            "mpf_people25_postcode": {
-                                "title": "Oist Code/ZIP",
-                                "type": "string" 
-                            },
-                            "mpf_people25_country": {
-                                "title": "Country",
-                                "type": "string" 
-                            },
-                            "mpf_people25_passport": {
-                                "title": "Passport Expity Date",
-                                "type": "string",
-                                format: "date"
-                            }
+                            "Address": {
+                                $ref: "#/definitions/AddressSchema"
+                            }                            
                         }
                     },
-                    document: {
+                    DocumentSchema: {
+                            /*TODO: make document work*/
                             type: "object",
-                            title: "Document",
+                            title: "Document",                            
+                            //additionalProperties: false,
                             properties: {
-                                "Name": {
-                                    type: "string"
+                                "Title": {
+                                    type: "string"                                    
                                 },
-                                "upload": {
+                                "Path": {
                                     title:"Upload document",
                                     type: "string",
                                     format: "url",
@@ -1057,11 +1159,12 @@
                                 }
                             }
                         },
-                        note: {
+                        NoteSchema: {
                             type: "object",
                             title: "Notes",
+                            //additionalProperties: false,
                             properties: {
-                                "mpf_note_comments": {
+                                "Comments": {
                                     title: "Comment",
                                     format: "textarea",
                                     type: "string",
@@ -1069,13 +1172,12 @@
                                         "input_height": "80px"
                                     }
                                 },
-                                "mpf_note_date": {
+                                "Date": {
                                     title: "Date",
                                     type: "string",
                                     format: "date"
                                 },
-                                /*JSON HAS FIELD FOR AUTHOR: authorId (http://json-schema.org/latest/json-schema-hypermedia.html) */
-                                "mpf_note_uid": {
+                                "Uid": {
                                     title: "Author",
                                     type: "string"
                                 }

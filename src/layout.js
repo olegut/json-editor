@@ -49,10 +49,16 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
             var fieldFound = false;
             if (group.Fields){
                 $each(group.Fields, function (i, field) {
-                    if (field.Path == editor.path) {
-                        fieldFound = true;
-                        foundGroup = group;
-                        return false;
+                    
+                    if (field.Path == editor.path 
+                    // in order to support relative path in layout
+                    || (editor.parent && editor.parent.path + '.' + field.Path == editor.path)) {
+                        if(!field.type || field.type == editor.original_schema.type){
+                            fieldFound = true;
+                            foundGroup = group;
+                            return false;
+                        }
+                        
                     }
                 });
                 if (fieldFound) {
@@ -102,6 +108,8 @@ JSONEditor.RootLayoutBuilder =JSONEditor.LayoutBuilder.AbstractLayoutBuilder.ext
         this._super(options);
     },   
     buildLayout: function () {
+        if(!this.options.layout_schema)
+            return;        
         var self = this;
         $each(this.options.layout_schema.layout, function (i, block) {
             var builder = new JSONEditor.LayoutBuilder.builders[block.type](self.options, block);
