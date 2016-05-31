@@ -66,9 +66,11 @@ JSONEditor.defaults.editors.string = JSONEditor.AbstractEditor.extend({
   },
   build: function() {
     var self = this, i;
+
     if(!this.options.compact) this.header = this.label = this.theme.getFormInputLabel(this.getTitle());
     if(this.schema.description) this.description = this.theme.getFormInputDescription(this.schema.description);
-
+    if(this.editor_description && this.editor_description.show_title == false)
+      this.label = null;
     this.format = this.schema.format;
     if(!this.format && this.schema.media && this.schema.media.type) {
       this.format = this.schema.media.type.replace(/(^(application|text)\/(x-)?(script\.)?)|(-source$)/g,'');

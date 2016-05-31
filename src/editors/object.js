@@ -53,7 +53,9 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     },
     layoutEditors: function () {
         var self = this, i, j;
-        if (!this.row_container || this.jsoneditor.layout_schema !== undefined) return;
+        // never align properties in case layout is used
+        if (this.jsoneditor.layout_schema !== undefined) 
+          return;
 
         // Sort editors by propertyOrder
         this.property_order = Object.keys(this.editors);
@@ -192,12 +194,16 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
 
         return schema;
     },
+    useLayoutSchema: function(){
+        return !this.layout_schema.isUndefined;
+    },
     preBuild: function () {
         this._super();
-
+                
         this.editors = {};
         this.cached_editors = {};
         var self = this;
+        this.group = this.getGroupForEditor(this);
 
         this.format = this.options.layout || this.options.object_layout || this.schema.format || this.jsoneditor.options.object_layout || 'normal';
 
@@ -258,17 +264,33 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
 
             return ordera - orderb;
         });
+        
     },
     build: function () {
-        var self = this;
-
+        this._super();
+        var self = this;        
+        this.layout_builder.buildLayout();
+        if(this.group && this.group.builder) {
+            this.group.builder.onEditorBuild(self);
+        }
         if (this.options.table_row) {
-            this.editor_holder = this.container;
+            this.editor_holder = this.container;            
             $each(this.editors, function (key, editor) {
-                var holder = self.theme.getTableCell();
-                self.editor_holder.appendChild(holder);
-
-                editor.setContainer(holder);
+                self.tryAppendToLayout(editor);
+                
+                if(!editor.container && !self.useLayoutSchema()){
+                    var holder = self.theme.getTableCell();
+                    self.editor_holder.appendChild(holder);
+                    editor.setContainer(holder);
+                } 
+                
+                // add fake container in case we're in layout mode and this editor
+                // is ignored
+                if (!editor.container) {
+                    editor.container = document.createElement("div");
+                    editor.container.style.display = 'none';
+                }
+                
                 editor.build();
                 editor.postBuild();
 
@@ -279,28 +301,19 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
                     holder.style.width = self.editors[key].options.input_width;
                 }
             });
-        }
+        } else
         // If the object should be rendered as a table 
-        else if (this.options.table) {
+         if (this.options.table) {
             // TODO: table display format
             throw "Not supported yet";
         }
         // If the object should be rendered as a div
-        else {
+        else {           
             
-            this.layout_builder = new JSONEditor.RootLayoutBuilder({
-                theme: this.theme,
-                layout_schema: this.jsoneditor.getLayoutSchemaFor(this),
-                root_container: this.container
-            });
-
-            this.layout_builder.buildLayout();
-            this.registerLayoutBuilder(self.layout_builder)
-
             this.header = document.createElement('span');
             this.header.textContent = this.getTitle();
             this.title = this.theme.getHeader(this.header);
-            if(!this.schema.hide_title) {
+            if((!this.editor_description || this.jsoneditor.layout_schema == undefined || this.editor_description.show_title)) {
                 if (this.container.firstChild) {
                     this.container.insertBefore(this.title, this.container.firstChild);
                 } else {
@@ -381,55 +394,39 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.error_holder = document.createElement('div');
             this.container.appendChild(this.error_holder);
 
-            var group = this.getGroupForEditor(self);
-            if (group) {
-                if (self.key == "root") {
-                    this.layout_holder = this.jsoneditor.layout_container;
-                    this.editor_holder = this.jsoneditor.layout_container;
-                } else {
-                    this.layout_holder = group.container.editor_holders;
-                    if (!this.layout_holder) {
-                        this.layout_holder = this.container;
-                    }
-                    this.editor_holder = this.theme.getIndentedPanel();
-                    this.row_container = this.theme.getGridContainer();
-                    this.editor_holder.appendChild(this.row_container);
-                    this.layout_holder.appendChild(this.editor_holder);
+            if (this.group) {
+                if(this.group.container.editor_holders){
+                    this.layout_holder = this.group.container.editor_holders;    
+                } else                
+                if (!this.layout_holder) {
+                    this.layout_holder = this.container;
                 }
-            } else if(!this.layout_builder.options.layout_schema){
+                this.editor_holder = this.theme.getIndentedPanel();
+                this.row_container = this.theme.getGridContainer();
+                this.editor_holder.appendChild(this.row_container);
+                this.layout_holder.appendChild(this.editor_holder);
+            } else if(!this.useLayoutSchema()){
                 this.editor_holder = this.theme.getIndentedPanel();
                 // Container for child editor area
                 this.container.appendChild(this.editor_holder);
                 // Container for rows of child editors
                 this.row_container = this.theme.getGridContainer();
                 this.editor_holder.appendChild(this.row_container);
-            } else{
-                // do nothing so far? 
             }
             
             $each(this.editors, function (key, editor) {
-                var group = self.getGroupForEditor(editor);
-                if (!group && editor.parent.key == "root") {
-                    // do nothing so far
-                } else
-                    if (group && group.builder) {
-                        var editorHolder = group.builder.buildEditorHolder(editor);
-                        group.container.editor_holders.appendChild(editorHolder);
-                        editor.setContainer(editorHolder);
-                    } else if(!self.layout_builder.options.layout_schema){
-                        var holder = self.theme.getGridColumn();
-                        // not sure that this is realy required 
-                        if (self.options.table_row) {
-                            holder = self.theme.getTableCell();
-                        }
-                        self.row_container.appendChild(holder);
-                        editor.setContainer(holder);
-                    }
+                self.tryAppendToLayout(editor);
                 
+                if(!editor.container && !self.useLayoutSchema()){
+                    var holder = self.theme.getGridColumn();
+                    self.row_container.appendChild(holder);
+                    editor.setContainer(holder);
+                } 
                 // add fake container in case we're in layout mode and this editor
                 // is ignored
                 if (!editor.container) {
                     editor.container = document.createElement("div");
+                    editor.container.style.display = 'none';
                 }
 
                 editor.build();
@@ -507,7 +504,7 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
         }
 
         // Fix table cell ordering
-        if (this.options.table_row) {
+        if (this.options.table_row && this.jsoneditor.layout_schema == undefined) {
             this.editor_holder = this.container;
             $each(this.property_order, function (i, key) {
                 self.editor_holder.appendChild(self.editors[key].container);
@@ -519,6 +516,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
             this.layoutEditors();
             // Do it again now that we know the approximate heights of elements
             this.layoutEditors();
+        }
+    },
+    tryAppendToLayout: function(editor){
+        var group = this.getGroupForEditor(editor);
+        if (group && group.builder) {          
+            group.builder.appendEditor(editor);
         }
     },
     showEditJSON: function () {

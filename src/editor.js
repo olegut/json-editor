@@ -8,7 +8,7 @@ JSONEditor.AbstractEditor = Class.extend({
   // consider unregistering when destroying the editor
   registerLayoutBuilder: function(builder){
     this.layout_builder = builder;
-  },
+  },  
   getGroupForEditor: function(editor, defaultBuilder){
       var result = undefined; 
       if(this.layout_builder)
@@ -21,7 +21,32 @@ JSONEditor.AbstractEditor = Class.extend({
         result = this.parent.getGroupForEditor(editor);
       }
       return result;
-  },  
+  },
+  findEditorDescriptionInLayout: function(){
+      if(this.editor_description)   
+        return;
+      this.editor_description = undefined;
+      var self = this;   
+      if(this.jsoneditor.layout_schema){
+        $each(this.jsoneditor.layout_schema.layout,function(i,layout) {
+          $each(layout.groups,function(i,group) {
+            $each(group.Fields, function (i, field) {
+              if (field.Path == self.path 
+                    // in order to support relative path in layout
+                    || (layout.layoutFor + '.' + field.Path == self.normalizedPath)) {
+                self.editor_description = field;
+              }
+              if(self.editor_description)
+                return false;
+            });
+            if(self.editor_description)
+                return false;
+          });      
+          if(self.editor_description)
+                return false;
+        });
+      }
+  },
   notify: function() {
     this.jsoneditor.notifyWatchers(this.path);
   },
@@ -52,7 +77,7 @@ JSONEditor.AbstractEditor = Class.extend({
     this.iconlib = this.jsoneditor.iconlib;
     
     this.translate = this.jsoneditor.translate || JSONEditor.defaults.translate;
-
+    
     this.original_schema = options.schema;
     this.schema = this.jsoneditor.expandSchema(this.original_schema);
     
@@ -66,7 +91,7 @@ JSONEditor.AbstractEditor = Class.extend({
     this.parent = options.parent;
     
     this.link_watchers = [];
-    
+    this.normalizedPath = normalizePath(this.path);
     if(options.container) this.setContainer(options.container);
     
   },
@@ -75,13 +100,21 @@ JSONEditor.AbstractEditor = Class.extend({
     if(this.schema.id) this.container.setAttribute('data-schemaid',this.schema.id);
     if(this.schema.type && typeof this.schema.type === "string") this.container.setAttribute('data-schematype',this.schema.type);
     this.container.setAttribute('data-schemapath',this.path);
+    if(this.layout_builder)
+      this.layout_builder.options.root_container = container;
   },
   
   preBuild: function() {
-    
+      this.layout_schema = this.jsoneditor.getLayoutSchemaFor(this) || { isUndefined : true };
+      this.layout_builder = new JSONEditor.RootLayoutBuilder({
+          theme: this.theme,
+          layout_schema: this.layout_schema,
+          root_container: this.container
+      });
+      this.findEditorDescriptionInLayout();
   },
   build: function() {
-    
+      
   },
   postBuild: function () {
     this.setupWatchListeners();
@@ -298,7 +331,9 @@ JSONEditor.AbstractEditor = Class.extend({
   getWatchedFieldValues: function() {
     return this.watched_values;
   },
-  updateHeaderText: function() {
+  updateHeaderText: function() {    
+    if(this.editor_description && !this.editor_description.show_title)
+      return;
     if(this.header) {
       // If the header has children, only update the text node's value
       if(this.header.children.length) {
@@ -316,6 +351,8 @@ JSONEditor.AbstractEditor = Class.extend({
     }
   },
   getHeaderText: function(title_only) {
+    if(this.editor_description && !this.editor_description.show_title)
+      return;    
     if(this.header_text) return this.header_text;
     else if(title_only) return this.schema.title;
     else return this.getTitle();

@@ -21,7 +21,9 @@
     <style>
         /* ------BEGIN------ */
         /* VERTICAL CHILD IM PROPS LAYOUT */
-  
+        .popup-element{
+            background-color: lightgray;
+        }
         .related-im-props-container .json-editor-btn-add,
         .related-im-props-container .json-editor-btn-delete {
             display: none;
@@ -309,17 +311,17 @@
     if(!layout_schema){
         layout_schema = {
                 layout: [
-                    // {
+                    //{
                     //     layoutFor: "root.Value.Oasys",
                     //     "groups":[
                     //         {
                     //             "Id": "LeftTab",
                     //             "Fields": [
                     //                 {
-                    //                     "Path": "root.Value.Oasys.Account",
+                    //                     "Path": "Account",
                     //                 },
                     //                 {
-                    //                     "Path": "root.Value.Oasys.Block",
+                    //                     "Path": "Block",
                     //                 }                                    
                     //             ]
                     //         },
@@ -327,10 +329,10 @@
                     //             "Id": "RightTab",
                     //             "Fields": [
                     //                 {
-                    //                     "Path": "root.Value.Oasys.Gacronym",
+                    //                     "Path": "Gacronym",
                     //                 },
                     //                 {
-                    //                     "Path": "root.Value.Oasys.Dacronym",
+                    //                     "Path": "Dacronym",
                     //                 }                                    
                     //             ]
                     //         }
@@ -368,31 +370,32 @@
                                     },
                                     {
                                         "Path": "Dob",
-                                    }                                      
+                                    },
+                                    {
+                                        "Path": "Address.Address",
+                                        show_title: false
+                                    }                                       
                                 ]
                             },
                             {
                                 "Id": "RightTab",
                                 "Fields": [
                                     {
-                                        "Path": "City",
+                                        "Path": "Address.City",
                                     },
                                     {
-                                        "Path": "State",
+                                        "Path": "Address.State",
                                     },
                                     {
-                                        "Path": "PostCode",
+                                        "Path": "Address.PostCode",
                                     },
                                     {
-                                        "Path": "Country",
-                                    },
-                                    {
-                                        "Path": "Address",
-                                        "type": "string"
-                                    }                                  
+                                        "Path": "Address.Country",
+                                    }                                 
                                 ]
                             }
                         ],
+                        // 1
                         // "layout":[
                         //     {
                         //             type: "container",
@@ -421,20 +424,42 @@
                         //                 }                                
                         //             ]                            
                         //         }
-                        // ]                        
+                        // ]  
+                        // 2                      
+                        // "layout":[
+                        //     {
+                        //             type: "tab_container",
+                        //             cssClass: "vertical-tab-container",
+                        //             "childBlocks": [
+                        //                 {
+                        //                     type: "tab",
+                        //                     title: "Full name",
+                        //                     "RefId": "LeftTab"
+                        //                 },
+                        //                 {
+                        //                     type: "tab",
+                        //                     title: "Address",
+                        //                     "RefId": "RightTab"
+                        //                 }                                
+                        //             ]                            
+                        //         }
+                        // ]
                         "layout":[
                             {
-                                    type: "tab_container",
-                                    cssClass: "vertical-tab-container",
+                                    type: "table_container",
+                                    "headerGroup": {
+                                        "RefId": "LeftTab"
+                                    }, 
                                     "childBlocks": [
                                         {
-                                            type: "tab",
+                                            type: "main_row_container",
                                             title: "Full name",
                                             "RefId": "LeftTab"
                                         },
                                         {
-                                            type: "tab",
+                                            type: "popup_row_container",
                                             title: "Address",
+                                            cssClass: "popup-element",  
                                             "RefId": "RightTab"
                                         }                                
                                     ]                            
@@ -724,6 +749,7 @@
                             },
                             Peoples25: {
                                 "type": "array",     
+                                format: "table",
                                 title: "Control over 25% (People)",                   
                                 "uniqueItems": true,
                                 "items": {
@@ -795,7 +821,6 @@
                                 title: "CC USA"
                             },
                             Oasys: {
-                                hide_title: true,
                                 $ref: "#/definitions/OasysSchema"
                             }   
                         },

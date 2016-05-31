@@ -25,10 +25,16 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     this.item_default = item_schema["default"] || null;
     this.item_has_child_editors = item_schema.properties || item_schema.items;
     this.width = 12;
-    this._super();
+    this._super();    
   },
   build: function() {
     var self = this;
+    // no need to build layout for table. It should be build for childs
+    // this.layout_builder.buildLayout();
+    if(this.layout_builder.options.layout_schema.layout && this.layout_builder.options.layout_schema.layout[0].builder 
+        && this.layout_builder.options.layout_schema.layout[0].builder.type == JSONEditor.LayoutBuilder.type.table){
+      this.tableBuilder = this.layout_builder.options.layout_schema.layout[0].builder;
+    }
     this.table = this.theme.getTable();
     this.container.appendChild(this.table);
     this.thead = this.theme.getTableHead();
@@ -65,8 +71,9 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     this.panel.appendChild(this.table);
     this.controls = this.theme.getButtonHolder();
     this.panel.appendChild(this.controls);
-
-    if(this.item_has_child_editors) {
+    if(this.tableBuilder){
+      this.tableBuilder.buildTableHeaders(tmp, self.header_row);
+    } else if(this.item_has_child_editors) {
       var ce = tmp.getChildEditors();
       var order = tmp.property_order || Object.keys(ce);
       for(var i=0; i<order.length; i++) {
@@ -121,12 +128,15 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
 
     ret.preBuild();
     if(!ignore) {
+      
+      ret.controls_cell = this.theme.getTableCell();
+      ret.table_controls = this.theme.getButtonHolder();
+      
       ret.build();
       ret.postBuild();
-
-      ret.controls_cell = row.appendChild(this.theme.getTableCell());
+      
+      row.appendChild(ret.controls_cell);
       ret.row = row;
-      ret.table_controls = this.theme.getButtonHolder();
       ret.controls_cell.appendChild(ret.table_controls);
       ret.table_controls.style.margin = 0;
       ret.table_controls.style.padding = 0;
@@ -320,7 +330,7 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     self.rows[i] = this.getElementEditor(i);
 
     var controls_holder = self.rows[i].table_controls;
-
+    
     // Buttons to delete row, move row up, and move row down
     if(!this.hide_delete_buttons) {
       self.rows[i].delete_button = this.getButton('','delete',this.translate('button_delete_row_title_short'));

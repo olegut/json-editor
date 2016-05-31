@@ -11,6 +11,30 @@ function isNormalInteger(str) {
     var n = ~~Number(str);
     return String(n) === str && n >= 0;
 }
+function normalizePath(path) {
+    var pathParts = path.split('.').filter(function(item){ return !isNormalInteger(item)});;
+    return pathParts.join('.');
+}
+
+function arrayIncludes(arrayObj, comparer, compareTo) {
+  var result = false;
+  $each(arrayObj,function(i,element) { 
+    if(comparer(element,compareTo)){
+      result = true;
+      return false;
+    }
+  });
+  return result;
+}
+function insertAfter(elem, refElem) {
+  var parent = refElem.parentNode;
+  var next = refElem.nextSibling;
+  if (next) {
+    return parent.insertBefore(elem, next);
+  } else {
+    return parent.appendChild(elem);
+  }
+}
 JSONEditor.prototype = {
   // necessary since we remove the ctor property by doing a literal assignment. Without this
   // the $isplainobject function will think that this is a plain object.
@@ -53,7 +77,6 @@ JSONEditor.prototype = {
     if(icon_class) this.iconlib = new icon_class();
 
     this.root_container = this.theme.getContainer();
-    this.layout_container = this.theme.getContainer();
 
     this.element.appendChild(this.root_container);
     this.translate = this.options.translate || JSONEditor.defaults.translate;
