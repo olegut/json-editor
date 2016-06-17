@@ -77,3 +77,65 @@ var $triggerc = function(el,event) {
 
   el.dispatchEvent(e);
 };
+
+if (!Object.assign) {
+  Object.defineProperty(Object, 'assign', {
+    enumerable: false,
+    configurable: true,
+    writable: true,
+    value: function(target, firstSource) {
+      'use strict';
+      if (target === undefined || target === null) {
+        throw new TypeError('Cannot convert first argument to object');
+      }
+
+      var to = Object(target);
+      for (var i = 1; i < arguments.length; i++) {
+        var nextSource = arguments[i];
+        if (nextSource === undefined || nextSource === null) {
+          continue;
+        }
+
+        var keysArray = Object.keys(Object(nextSource));
+        for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+          var nextKey = keysArray[nextIndex];
+          var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+          if (desc !== undefined && desc.enumerable) {
+            to[nextKey] = nextSource[nextKey];
+          }
+        }
+      }
+      return to;
+    }
+  });
+}
+
+
+function isNormalInteger(str) {
+    var n = ~~Number(str);
+    return String(n) === str && n >= 0;
+}
+function normalizePath(path) {
+    var pathParts = path.split('.').filter(function(item){ return !isNormalInteger(item)});;
+    return pathParts.join('.');
+}
+
+function arrayIncludes(arrayObj, comparer, compareTo) {
+  var result = false;
+  $each(arrayObj,function(i,element) { 
+    if(comparer(element,compareTo)){
+      result = true;
+      return false;
+    }
+  });
+  return result;
+}
+function insertAfter(elem, refElem) {
+  var parent = refElem.parentNode;
+  var next = refElem.nextSibling;
+  if (next) {
+    return parent.insertBefore(elem, next);
+  } else {
+    return parent.appendChild(elem);
+  }
+}

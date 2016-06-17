@@ -13,8 +13,11 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
         this.container = {};
         this.type = JSONEditor.LayoutBuilder.type.general;
     },
+    destroy: function(){
+        
+    },
     onEditorBuild: function(editor){
-        debugger;
+        
     },
     buildContainer: function () {
         if (this.options.block.title && !this.ignoreTitle) {
@@ -106,7 +109,7 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
             return foundGroup;
         }
     },
-    _buildBlock: function () {
+    buildLayout: function () {
         var self = this;
         this.options.block.container = this.buildContainer();
         this.afterBuildContainer();
@@ -115,7 +118,7 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
             childOptions.block = innerBlock;
             childOptions.parentBlock = self.options.block;
             var builder = new JSONEditor.LayoutBuilder.builders[innerBlock.type](childOptions);
-            builder._buildBlock();
+            builder.buildLayout();
         });
         this.attach();
     },
@@ -135,23 +138,6 @@ JSONEditor.LayoutBuilder.AbstractLayoutBuilder = Class.extend({
     }
 });
 
-JSONEditor.RootLayoutBuilder = JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
-    init: function (options) {
-        this._super(options);
-    },
-    buildLayout: function () {
-        if (!this.options.layout_schema)
-            return;
-        var self = this;
-        $each(this.options.layout_schema.layout, function (i, block) {
-            var childOptions = Object.assign({}, self.options)
-            childOptions.block = block;
-            var builder = new JSONEditor.LayoutBuilder.builders[block.type](childOptions);
-            builder._buildBlock();
-        });
-    }
-});
-
 JSONEditor.LayoutBuilder.builders = {};
 
 JSONEditor.LayoutBuilder.builders.separator = JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
@@ -168,8 +154,6 @@ JSONEditor.LayoutBuilder.builders.separator = JSONEditor.LayoutBuilder.AbstractL
 
 JSONEditor.LayoutBuilder.builders.group = JSONEditor.LayoutBuilder.AbstractLayoutBuilder.extend({
     init: function (options) {
-        this.active_tab = null;
-        this.tabs = [];
         this._super(options);
         this.group = this._findGroup(this.options.block.RefId);
     },
@@ -179,7 +163,7 @@ JSONEditor.LayoutBuilder.builders.group = JSONEditor.LayoutBuilder.AbstractLayou
         this._super();
         return this.container;
     },
-    _buildBlock: function () {
+    buildLayout: function () {
         this._super();
         this.group.container = this.container;
         this.group.builder = this;
@@ -268,7 +252,10 @@ JSONEditor.LayoutBuilder.builders.table_container = JSONEditor.LayoutBuilder.Abs
         this._super(options);
         this.type = JSONEditor.LayoutBuilder.type.table;
         this.headerGroup = this._findGroup(this.options.block.headerGroup.RefId);
-         this.name = "table_container";
+    },    
+    destroy: function () {
+        $(this.popover_root).popover('destroy');
+        this._super();
     },
     buildContainer: function () {
         this.container.root = this.options.root_container;
@@ -286,6 +273,25 @@ JSONEditor.LayoutBuilder.builders.table_container = JSONEditor.LayoutBuilder.Abs
             }
         });
     },
+    onEditorBuild: function(editor){
+        var self = this;
+        var popup_button = editor.getButton('','edit', 'Show details');
+        this.popover_root = editor.container;
+        this.popover_root.setAttribute('data-container','body');
+        this.popover_root.setAttribute('data-toggle','popover');
+        this.popover_root.setAttribute('data-placement','bottom');
+        $(this.popover_root).popover({
+            html : true, 
+            trigger:'manual',
+            content: function() {
+                return self.popup_row_container.container.editor_holders;
+            }
+        });        
+        editor.table_controls.appendChild(popup_button);
+        popup_button.addEventListener('click', function(e){
+            $(self.popover_root).popover('toggle');
+        })
+    },
     attach: function () {
         // no need to do this         
     }
@@ -295,7 +301,6 @@ JSONEditor.LayoutBuilder.builders.main_row_container = JSONEditor.LayoutBuilder.
     init: function (options) {
         this._super(options);
         this.headerGroup = this._findGroup(this.options.parentBlock.headerGroup.RefId);
-        this.name = "main_row_container";
     },
     buildContainer: function () {
         var self = this;
@@ -313,7 +318,6 @@ JSONEditor.LayoutBuilder.builders.main_row_container = JSONEditor.LayoutBuilder.
     },
     appendEditor: function (editor) {
         var self = this;
-
         $each(this.headerGroup.Fields, function(i, field){
             var editorForField = self.findEditorByRelativePath(editor, field.Path);
             if (editorForField) {
@@ -323,22 +327,6 @@ JSONEditor.LayoutBuilder.builders.main_row_container = JSONEditor.LayoutBuilder.
             }
         });       
     },   
-    onEditorBuild: function(editor){
-        var self = this;
-        var popup_row = editor.getButton('','edit', 'Show details');
-        popup_row.addEventListener('click',function(e) {
-            self.popup_row_container.show();
-        });
-        editor.table_controls.appendChild(popup_row);
-    },    
-    // show: function () {
-    //     this.container.editor_holders.style.left = this.container.editor_holders.offsetLeft + "px";
-    //     this.container.editor_holders.style.top = this.container.editor_holders.offsetTop + this.container.editor_holders.offsetHeight + "px";
-    //     this.container.editor_holders.style.display = '';
-    // },
-    // hide: function () {
-    //     this.container.editor_holders.style.display = 'none';
-    // },    
     attach: function () {
         // no need to do this         
     }
@@ -347,26 +335,18 @@ JSONEditor.LayoutBuilder.builders.main_row_container = JSONEditor.LayoutBuilder.
 JSONEditor.LayoutBuilder.builders.popup_row_container = JSONEditor.LayoutBuilder.builders.group.extend({
     init: function (options) {
         this._super(options);
-        this.name = "popup_row_container";
         this.options.parentBlock.builder.popup_row_container = this;
+        this.popupIsShown = false;
     },
     buildContainer: function () {
-        this.container.root = document.createElement('div');
-        this.container.editor_holders = this.container.root;//  this.theme.getModal();
-        this.container.editor_holders.style.padding = '5px 0';
-        this.container.editor_holders.style.overflowY = 'auto';
-        this.container.editor_holders.style.overflowX = 'hidden';
-        this.container.editor_holders.style.paddingLeft = '5px';
+        this.container.root = this.options.theme.getTableCell();        
+        this.container.editor_holders = document.createElement('div');
         this.container.editor_holders.setAttribute('class', 'popup-row-container');
-        // var headerGroup =  this._findGroup(this.options.parentBlock.headerGroup.RefId);
-        // this.container.editor_holders.setAttribute('colspan',headerGroup.Fields.length);
-        // this.container.root.appendChild(this.container.editor_holders);
-        this.options.root_container.appendChild(this.container.editor_holders);
+        this.options.root_container.appendChild(this.container.root);
         return this.container;
     },
-    attach: function () {
+    attach: function () { 
         this._super();
-        //insertAfter(this.container.root, this.options.parentBlock.builder.container.root);
     }
 });
 // 

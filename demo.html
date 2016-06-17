@@ -15,13 +15,26 @@
             font-style: normal;
         }
     </style>
-    <script src="auto-complete.min.js"></script>
-    <link rel="stylesheet" href="auto-complete.css">
+    <script src="plugins/auto-complete/auto-complete.min.js"></script>
+    <link rel="stylesheet" href="plugins/auto-complete/auto-complete.css">
     <script src='dist/jsoneditor.js'></script>
+    
+    <script src="plugins/jquery/jquery-2.2.4.min.js"></script>
+    <script src="plugins/bootstrap-popover/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="plugins/bootstrap-popover/css/bootstrap.min.css">
+    
     <style>
+        .popover{
+            max-width: none !important;
+        }
+        
+        .popup-row-container > div {
+            display: inline-block;
+            margin: 2px;
+        }
         /* ------BEGIN------ */
         /* VERTICAL CHILD IM PROPS LAYOUT */
-        .popup-element{
+        .popup-element > div{
             background-color: lightgray;
         }
         .related-im-props-container .json-editor-btn-add,
@@ -83,7 +96,7 @@
         
         .improp-root-element {
             width: 90%;
-            max-width: 830px;
+            max-width: 900px;
             min-width: 260px;
         }
         
@@ -309,56 +322,10 @@
     // JSONEditor.defaults.options.no_additional_properties = true;
     
     if(!layout_schema){
-        layout_schema = {
-                layout: [
-                    //{
-                    //     layoutFor: "root.Value.Oasys",
-                    //     "groups":[
-                    //         {
-                    //             "Id": "LeftTab",
-                    //             "Fields": [
-                    //                 {
-                    //                     "Path": "Account",
-                    //                 },
-                    //                 {
-                    //                     "Path": "Block",
-                    //                 }                                    
-                    //             ]
-                    //         },
-                    //         {
-                    //             "Id": "RightTab",
-                    //             "Fields": [
-                    //                 {
-                    //                     "Path": "Gacronym",
-                    //                 },
-                    //                 {
-                    //                     "Path": "Dacronym",
-                    //                 }                                    
-                    //             ]
-                    //         }
-                    //     ],                        
-                    //     "layout":[
-                    //         {
-                    //                 type: "tab_container",
-                    //                 cssClass: "vertical-tab-container",
-                    //                 "childBlocks": [
-                    //                     {
-                    //                         type: "tab",
-                    //                         title: "Left Tab",
-                    //                         "RefId": "LeftTab"
-                    //                     },
-                    //                     {
-                    //                         type: "tab",
-                    //                         title: "Right Tab",
-                    //                         "RefId": "RightTab"
-                    //                     }                                
-                    //                 ]                            
-                    //             }
-                    //     ]
-                    // },
+        layout_schema = [
                     {
                         layoutFor: "root.Value.Peoples25",
-                        "groups":[
+                        "groups": [
                             {
                                 "Id": "LeftTab",
                                 "Fields": [
@@ -396,7 +363,7 @@
                             }
                         ],
                         // 1
-                        // "layout":[
+                        // "layout":
                         //     {
                         //             type: "container",
                         //             "childBlocks": [
@@ -424,9 +391,9 @@
                         //                 }                                
                         //             ]                            
                         //         }
-                        // ]  
+                        //   
                         // 2                      
-                        // "layout":[
+                        // "layout":
                         //     {
                         //             type: "tab_container",
                         //             cssClass: "vertical-tab-container",
@@ -443,8 +410,8 @@
                         //                 }                                
                         //             ]                            
                         //         }
-                        // ]
-                        "layout":[
+                        // 
+                        "layout":
                             {
                                     type: "table_container",
                                     "headerGroup": {
@@ -463,8 +430,7 @@
                                             "RefId": "RightTab"
                                         }                                
                                     ]                            
-                                }
-                        ]
+                            }
                     },
                     {
                         layoutFor: "root",
@@ -594,7 +560,7 @@
                             ]
                         }                                                                                                 
                         ],
-                        "layout": [
+                        "layout": 
                         {
                             type: "container",
                             cssClass: "improp-root-element",                      
@@ -717,10 +683,9 @@
                                 }
                             ]
                         }
-                        ]
+                        
                     }
-                ]                
-            };
+        ];
     }
     // Default starting schema
     if(!schema) {

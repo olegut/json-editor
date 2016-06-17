@@ -268,11 +268,12 @@ JSONEditor.defaults.editors.object = JSONEditor.AbstractEditor.extend({
     },
     build: function () {
         this._super();
-        var self = this;        
-        this.layout_builder.buildLayout();
-        if(this.group && this.group.builder) {
-            this.group.builder.onEditorBuild(self);
-        }
+        var self = this;    
+        if(this.layout_builder){
+            this.layout_builder.buildLayout();
+            this.layout_builder.onEditorBuild(self);
+            
+        }    
         if (this.options.table_row) {
             this.editor_holder = this.container;            
             $each(this.editors, function (key, editor) {

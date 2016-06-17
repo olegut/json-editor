@@ -29,12 +29,7 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
   },
   build: function() {
     var self = this;
-    // no need to build layout for table. It should be build for childs
-    // this.layout_builder.buildLayout();
-    if(this.layout_builder.options.layout_schema.layout && this.layout_builder.options.layout_schema.layout[0].builder 
-        && this.layout_builder.options.layout_schema.layout[0].builder.type == JSONEditor.LayoutBuilder.type.table){
-      this.tableBuilder = this.layout_builder.options.layout_schema.layout[0].builder;
-    }
+
     this.table = this.theme.getTable();
     this.container.appendChild(this.table);
     this.thead = this.theme.getTableHead();
@@ -71,8 +66,8 @@ JSONEditor.defaults.editors.table = JSONEditor.defaults.editors.array.extend({
     this.panel.appendChild(this.table);
     this.controls = this.theme.getButtonHolder();
     this.panel.appendChild(this.controls);
-    if(this.tableBuilder){
-      this.tableBuilder.buildTableHeaders(tmp, self.header_row);
+    if(this.layout_builder){
+      this.layout_builder.buildTableHeaders(tmp, self.header_row);
     } else if(this.item_has_child_editors) {
       var ce = tmp.getChildEditors();
       var order = tmp.property_order || Object.keys(ce);

@@ -7,34 +7,7 @@ var JSONEditor = function(element,options) {
   this.options = options;
   this.init();
 };
-function isNormalInteger(str) {
-    var n = ~~Number(str);
-    return String(n) === str && n >= 0;
-}
-function normalizePath(path) {
-    var pathParts = path.split('.').filter(function(item){ return !isNormalInteger(item)});;
-    return pathParts.join('.');
-}
 
-function arrayIncludes(arrayObj, comparer, compareTo) {
-  var result = false;
-  $each(arrayObj,function(i,element) { 
-    if(comparer(element,compareTo)){
-      result = true;
-      return false;
-    }
-  });
-  return result;
-}
-function insertAfter(elem, refElem) {
-  var parent = refElem.parentNode;
-  var next = refElem.nextSibling;
-  if (next) {
-    return parent.insertBefore(elem, next);
-  } else {
-    return parent.appendChild(elem);
-  }
-}
 JSONEditor.prototype = {
   // necessary since we remove the ctor property by doing a literal assignment. Without this
   // the $isplainobject function will think that this is a plain object.
@@ -46,9 +19,9 @@ JSONEditor.prototype = {
     // return parent layout schema for items inside the array 
     if(isNormalInteger(editor.key)){
       path = editor.parent.path;
-    }    
-    if(this.layout_schema){
-      $each(this.layout_schema.layout,function(i,schema) { 
+    }
+    if(this.layout_schema) { 
+      $each(this.layout_schema,function(i,schema) { 
         if(schema.layoutFor == path){
           result = schema;
         }

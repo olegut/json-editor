@@ -28,7 +28,7 @@ JSONEditor.AbstractEditor = Class.extend({
       this.editor_description = undefined;
       var self = this;   
       if(this.jsoneditor.layout_schema){
-        $each(this.jsoneditor.layout_schema.layout,function(i,layout) {
+        $each(this.jsoneditor.layout_schema,function(i,layout) {
           $each(layout.groups,function(i,group) {
             $each(group.Fields, function (i, field) {
               if (field.Path == self.path 
@@ -106,11 +106,14 @@ JSONEditor.AbstractEditor = Class.extend({
   
   preBuild: function() {
       this.layout_schema = this.jsoneditor.getLayoutSchemaFor(this) || { isUndefined : true };
-      this.layout_builder = new JSONEditor.RootLayoutBuilder({
-          theme: this.theme,
-          layout_schema: this.layout_schema,
-          root_container: this.container
-      });
+      if(!this.layout_schema.isUndefined){
+        this.layout_builder = new JSONEditor.LayoutBuilder.builders[this.layout_schema.layout.type]({
+            theme: this.theme,
+            layout_schema: this.layout_schema,
+            block: this.layout_schema.layout,
+            root_container: this.container
+        });
+      }
       this.findEditorDescriptionInLayout();
   },
   build: function() {
@@ -401,6 +404,8 @@ JSONEditor.AbstractEditor = Class.extend({
     $each(this.watched,function(name,adjusted_path) {
       self.jsoneditor.unwatch(adjusted_path,self.watch_listener);
     });
+    if(this.layout_builder)
+      this.layout_builder.destroy();
     this.watched = null;
     this.watched_values = null;
     this.watch_listener = null;
